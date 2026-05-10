@@ -133,13 +133,33 @@ class PoseDetectionService: NSObject, ObservableObject {
     }
 
     func switchCamera() {
-        let wasRunning = captureSession.isRunning
-        poseQueue.async {
+        // All session work on poseQueue to guarantee no overlap with startRunning
+        poseQueue.async { [weak self] in
+            guard let self else { return }
+            let wasRunning = self.captureSession.isRunning
             if wasRunning { self.captureSession.stopRunning() }
-            DispatchQueue.main.async {
-                self.cameraPosition = self.cameraPosition == .front ? .back : .front
-                self.setupSession()
-                if wasRunning { self.start() }
+
+            let newPosition: AVCaptureDevice.Position = self.cameraPosition == .front ? .back : .front
+
+            self.captureSession.beginConfiguration()
+            self.captureSession.inputs.forEach { self.captureSession.removeInput($0) }
+
+            if let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: newPosition),
+               let input = try? AVCaptureDeviceInput(device: camera),
+               self.captureSession.canAddInput(input) {
+                self.captureSession.addInput(input)
+            }
+            if let conn = self.videoOutput.connection(with: .video),
+               conn.isVideoRotationAngleSupported(90) {
+                conn.videoRotationAngle = 90
+            }
+            self.captureSession.commitConfiguration()
+
+            DispatchQueue.main.async { self.cameraPosition = newPosition }
+
+            if wasRunning {
+                self.captureSession.startRunning()
+                DispatchQueue.main.async { self.isRunning = true }
             }
         }
     }

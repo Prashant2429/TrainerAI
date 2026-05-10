@@ -1,0 +1,1364 @@
+[
+  {
+    "id": "squat",
+    "name": "Barbell Squat",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings", "Core"],
+    "category": "compound",
+    "cameraAngle": "45° diagonal",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against the rack upright, about 2 meters away at a 45-degree angle.",
+    "stepByStepCues": [
+      "Stand with feet shoulder-width apart, toes slightly out",
+      "Brace your core and take a deep breath",
+      "Push your knees out in line with your toes as you descend",
+      "Lower until thighs are parallel to the floor or below",
+      "Drive through your heels to stand back up"
+    ],
+    "commonMistakes": ["Knees caving inward", "Not reaching depth", "Forward torso collapse", "Heels rising"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Knee valgus — knees caving inward",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeXOffset < ankleXOffset by more than 15px",
+        "severity": "critical",
+        "midRepCue": "knees out",
+        "debriefCue": "Your knees were caving inward on several reps — focus on pushing them out in line with your toes."
+      },
+      {
+        "id": "squat_depth",
+        "description": "Insufficient squat depth",
+        "jointKeypoints": ["leftHip", "leftKnee"],
+        "errorCondition": "hipY < kneeY at bottom position",
+        "severity": "warning",
+        "midRepCue": "go deeper",
+        "debriefCue": "You're not reaching full depth — aim for hips below knee level on the next set."
+      }
+    ]
+  },
+  {
+    "id": "bicep_curl",
+    "name": "Bicep Curl",
+    "musclesTargeted": ["Biceps", "Brachialis"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the bench beside you at waist height, camera facing your side.",
+    "stepByStepCues": [
+      "Stand tall, core braced, shoulders back",
+      "Hold dumbbells with palms facing forward",
+      "Curl up keeping elbows pinned to your sides",
+      "Squeeze at the top, then lower slowly over 3 seconds",
+      "Fully extend at the bottom before the next rep"
+    ],
+    "commonMistakes": ["Body swinging for momentum", "Elbows drifting forward", "Incomplete range of motion", "Wrist curling under load"],
+    "formRules": [
+      {
+        "id": "curl_swing",
+        "description": "Body swinging — using momentum",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoVelocity > 0.3 during concentric phase",
+        "severity": "critical",
+        "midRepCue": "don't swing",
+        "debriefCue": "You're swinging your torso to lift the weight — pin your elbows to your sides and slow down."
+      },
+      {
+        "id": "curl_elbow",
+        "description": "Elbow drifting forward",
+        "jointKeypoints": ["leftElbow", "leftShoulder"],
+        "errorCondition": "elbowX > shoulderX by more than 20px",
+        "severity": "warning",
+        "midRepCue": "elbows back",
+        "debriefCue": "Your elbows drifted forward on the curl — keep them pinned at your sides throughout the movement."
+      }
+    ]
+  },
+  {
+    "id": "lateral_raise",
+    "name": "Lateral Raise",
+    "musclesTargeted": ["Lateral Deltoid", "Supraspinatus"],
+    "category": "shoulder",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the dumbbell rack shelf at chest height, camera facing you directly.",
+    "stepByStepCues": [
+      "Stand with slight bend in elbows, dumbbells at your sides",
+      "Raise arms out to the sides, leading with your elbows",
+      "Stop when arms reach shoulder height — parallel to floor",
+      "Keep shoulders depressed — don't shrug",
+      "Lower slowly with control"
+    ],
+    "commonMistakes": ["Traps shrugging up", "Body leaning sideways", "Arms going above parallel", "Elbows dropping below wrists"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Trap shrug — shoulders elevating",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline by 15px",
+        "severity": "critical",
+        "midRepCue": "drop shoulders",
+        "debriefCue": "Your traps are taking over — consciously pull your shoulders down away from your ears before each rep."
+      },
+      {
+        "id": "lateral_lean",
+        "description": "Lateral body lean",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoLateralTilt > 8 degrees",
+        "severity": "warning",
+        "midRepCue": "stand straight",
+        "debriefCue": "You're leaning to one side — stand upright and lower the weight if needed."
+      }
+    ]
+  },
+  {
+    "id": "deadlift",
+    "name": "Deadlift",
+    "musclesTargeted": ["Hamstrings", "Glutes", "Erector Spinae", "Traps", "Core"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a weight plate, about 2 meters to your side.",
+    "stepByStepCues": [
+      "Stand with bar over mid-foot, hip-width stance",
+      "Hinge at hips, grip bar just outside legs",
+      "Chest up, lats engaged, neutral spine before lifting",
+      "Push floor away, keep bar close to your body",
+      "Lock out hips and knees at the top simultaneously"
+    ],
+    "commonMistakes": ["Spine rounding", "Bar drifting from body", "Hips shooting up early", "Neck hyperextension"],
+    "formRules": [
+      {
+        "id": "deadlift_spine",
+        "description": "Spinal rounding",
+        "jointKeypoints": ["leftShoulder", "leftHip", "neck"],
+        "errorCondition": "spineAngleDeviation > 15 degrees from neutral",
+        "severity": "critical",
+        "midRepCue": "chest up",
+        "debriefCue": "Your lower back rounded during the pull — reset, brace your core hard, and think chest up before you lift."
+      },
+      {
+        "id": "deadlift_grip",
+        "description": "Grip loosening — fingers opening under load",
+        "jointKeypoints": ["indexMCP", "indexPIP", "middleMCP", "middlePIP"],
+        "errorCondition": "avgFingerPIP > 145 degrees",
+        "severity": "critical",
+        "midRepCue": "squeeze bar",
+        "debriefCue": "Your grip was opening during the pull — crush the bar harder or consider chalk/straps for heavier sets."
+      }
+    ]
+  },
+  {
+    "id": "bench_press",
+    "name": "Bench Press",
+    "musclesTargeted": ["Pectoralis Major", "Triceps", "Anterior Deltoid"],
+    "category": "compound",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the floor at the head of the bench, camera facing up toward you.",
+    "stepByStepCues": [
+      "Lie with eyes under the bar, feet flat on floor",
+      "Grip slightly wider than shoulder-width, wrists straight",
+      "Retract shoulder blades and arch slightly",
+      "Lower bar to lower chest with control",
+      "Press bar up and slightly back toward the rack"
+    ],
+    "commonMistakes": ["Elbow flare", "Bar path drifting", "Butt lifting off bench", "Uneven bar descent"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Excessive elbow flare",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees from torso",
+        "severity": "warning",
+        "midRepCue": "tuck elbows",
+        "debriefCue": "Your elbows are flaring too wide — tuck them to about 60 degrees from your torso to protect your shoulders."
+      }
+    ]
+  },
+  {
+    "id": "ohp",
+    "name": "Overhead Press",
+    "musclesTargeted": ["Anterior Deltoid", "Triceps", "Upper Traps", "Core"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the bench beside you at waist height, camera facing your side.",
+    "stepByStepCues": [
+      "Stand with bar at collarbone, grip shoulder-width",
+      "Brace core hard, squeeze glutes",
+      "Press bar straight up, moving head back slightly",
+      "Lock out fully at the top",
+      "Lower under control to collarbone"
+    ],
+    "commonMistakes": ["Lower back hyperextension", "Bar path drifting forward", "Incomplete lockout", "Losing core tension"],
+    "formRules": [
+      {
+        "id": "ohp_back_arch",
+        "description": "Excessive lower back arch",
+        "jointKeypoints": ["leftShoulder", "leftHip", "leftKnee"],
+        "errorCondition": "lumbarAngle > 20 degrees hyperextension",
+        "severity": "critical",
+        "midRepCue": "squeeze glutes",
+        "debriefCue": "You're hyperextending your lower back — squeeze your glutes and brace your core before each press."
+      }
+    ]
+  },
+  {
+    "id": "barbell_row",
+    "name": "Barbell Row",
+    "musclesTargeted": ["Latissimus Dorsi", "Rhomboids", "Rear Deltoid", "Biceps"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor about 2 meters to your side, leaning against a plate.",
+    "stepByStepCues": [
+      "Hinge to 45-degree torso angle, bar hanging",
+      "Pull bar to lower chest, driving elbows back",
+      "Squeeze shoulder blades at the top",
+      "Lower under control — full extension at bottom",
+      "Keep torso angle consistent throughout"
+    ],
+    "commonMistakes": ["Jerking with momentum", "Torso rising on each rep", "Partial range of motion", "Elbows flaring wide"],
+    "formRules": [
+      {
+        "id": "row_momentum",
+        "description": "Using momentum — jerking the weight",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoVelocity > 0.4 during concentric",
+        "severity": "critical",
+        "midRepCue": "slow down",
+        "debriefCue": "You're jerking the weight up — pause at the bottom of each rep and pull with control."
+      },
+      {
+        "id": "row_grip",
+        "description": "Grip loosening — fingers opening at the pull",
+        "jointKeypoints": ["indexMCP", "indexPIP", "middleMCP", "middlePIP"],
+        "errorCondition": "avgFingerPIP > 145 degrees",
+        "severity": "warning",
+        "midRepCue": "grip tight",
+        "debriefCue": "Your grip was slipping during the row — focus on squeezing the bar hard before you initiate the pull."
+      }
+    ]
+  },
+  {
+    "id": "cable_pushdown",
+    "name": "Cable Tricep Pushdown",
+    "musclesTargeted": ["Triceps"],
+    "category": "cable",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a weight plate, about 2 meters to your side.",
+    "stepByStepCues": [
+      "Stand close to cable, elbows pinned to sides at 90 degrees",
+      "Push handle down until arms fully extended",
+      "Squeeze triceps hard at the bottom",
+      "Return slowly — stop when forearms are parallel to floor",
+      "Keep elbows locked in position throughout"
+    ],
+    "commonMistakes": ["Elbows drifting forward", "Leaning over the cable", "Incomplete extension", "Using body momentum"],
+    "formRules": [
+      {
+        "id": "pushdown_elbow",
+        "description": "Elbows drifting forward",
+        "jointKeypoints": ["leftElbow", "leftShoulder"],
+        "errorCondition": "elbowX > shoulderX by more than 25px",
+        "severity": "warning",
+        "midRepCue": "elbows back",
+        "debriefCue": "Your elbows are drifting forward — pin them to your sides and only your forearms should move."
+      }
+    ]
+  },
+  {
+    "id": "cable_row",
+    "name": "Seated Cable Row",
+    "musclesTargeted": ["Latissimus Dorsi", "Rhomboids", "Biceps"],
+    "category": "cable",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the cable stack platform to your side at waist height.",
+    "stepByStepCues": [
+      "Sit upright, slight bend in knees, neutral spine",
+      "Pull handle to lower abdomen, driving elbows back",
+      "Squeeze shoulder blades together at end position",
+      "Extend arms fully on the return — feel the lat stretch",
+      "Keep torso upright — don't rock back and forth"
+    ],
+    "commonMistakes": ["Rocking torso back on pull", "Hips rotating", "Partial range of motion", "Shrugging shoulders"],
+    "formRules": [
+      {
+        "id": "cable_row_rock",
+        "description": "Rocking torso backward for momentum",
+        "jointKeypoints": ["leftShoulder", "leftHip"],
+        "errorCondition": "torsoAngleChange > 15 degrees during rep",
+        "severity": "critical",
+        "midRepCue": "sit up straight",
+        "debriefCue": "You're rocking back to pull the weight — keep your torso fixed at 90 degrees and pull with your back, not your body."
+      }
+    ]
+  },
+  {
+    "id": "lunge",
+    "name": "Dumbbell Lunge",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings", "Core"],
+    "category": "compound",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a bench in front of you at chest height, camera facing you.",
+    "stepByStepCues": [
+      "Stand tall, dumbbells at sides",
+      "Step forward with one leg, lowering back knee toward floor",
+      "Front knee stays above ankle — don't let it drift forward",
+      "Push through front heel to return to standing",
+      "Alternate legs or complete all reps on one side"
+    ],
+    "commonMistakes": ["Front knee caving inward", "Torso leaning forward", "Back knee slamming floor", "Uneven stride length"],
+    "formRules": [
+      {
+        "id": "lunge_knee",
+        "description": "Front knee caving inward",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeXOffset < ankleXOffset by more than 10px",
+        "severity": "critical",
+        "midRepCue": "knee out",
+        "debriefCue": "Your front knee is caving inward on the lunge — drive it out in line with your second toe."
+      }
+    ]
+  },
+  {
+    "id": "pushup",
+    "name": "Push-up",
+    "musclesTargeted": ["Pectoralis Major", "Triceps", "Anterior Deltoid", "Core"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, propped against a water bottle.",
+    "stepByStepCues": [
+      "Start in a high plank: hands shoulder-width, body in a straight line",
+      "Lower chest until it nearly touches the floor",
+      "Keep elbows at roughly 45 degrees — not fully flared",
+      "Press through the palms to full extension",
+      "Maintain a rigid core throughout — no hip sag or pike"
+    ],
+    "commonMistakes": ["Hips sagging", "Elbows flaring wide", "Partial range of motion"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Elbow flare — elbows pointing too wide",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees",
+        "severity": "warning",
+        "midRepCue": "tuck elbows",
+        "debriefCue": "Your elbows are flaring too wide on the push-up — keep them at 45 degrees from your torso."
+      },
+      {
+        "id": "deadlift_spine",
+        "description": "Hips sagging — spine not neutral",
+        "jointKeypoints": ["leftShoulder", "leftHip", "neck"],
+        "errorCondition": "spineAngleDeviation > 15 degrees",
+        "severity": "critical",
+        "midRepCue": "tight core",
+        "debriefCue": "Your hips are sagging — brace your core hard and keep your body in a rigid straight line."
+      }
+    ]
+  },
+  {
+    "id": "pullup",
+    "name": "Pull-up",
+    "musclesTargeted": ["Latissimus Dorsi", "Biceps", "Rear Deltoid", "Core"],
+    "category": "compound",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the floor beneath the pull-up bar, leaning against a weight plate, camera angled up.",
+    "stepByStepCues": [
+      "Hang with arms fully extended, shoulders packed down",
+      "Pull elbows toward your hips, not just down",
+      "Chin clears the bar at the top",
+      "Depress your shoulder blades — don't let traps shrug",
+      "Lower slowly to full hang between every rep"
+    ],
+    "commonMistakes": ["Shoulder shrugging at top", "Kipping without intention", "Incomplete range of motion"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Shoulder shrug — traps elevating at the top",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline by 15px",
+        "severity": "warning",
+        "midRepCue": "pack shoulders",
+        "debriefCue": "Your shoulders are shrugging up at the top of the pull-up — actively depress your scapula as you pull."
+      }
+    ]
+  },
+  {
+    "id": "tricep_dip",
+    "name": "Tricep Dip",
+    "musclesTargeted": ["Triceps", "Anterior Deltoid", "Pectoralis Minor"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone 2 meters to your side on the floor, leaning against a dumbbell.",
+    "stepByStepCues": [
+      "Grip parallel bars, arms locked out, shoulders down",
+      "Lean slightly forward for tricep emphasis",
+      "Lower until upper arms are parallel to the floor",
+      "Keep elbows tracking backward — not flaring out",
+      "Press back to lockout squeezing the triceps"
+    ],
+    "commonMistakes": ["Elbow flare", "Dropping too deep below parallel", "Shrugging shoulders"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Elbows flaring outward",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees",
+        "severity": "warning",
+        "midRepCue": "elbows back",
+        "debriefCue": "Your elbows are flaring out on the dip — keep them pointing straight back to keep the load on your triceps."
+      }
+    ]
+  },
+  {
+    "id": "incline_press",
+    "name": "Incline Bench Press",
+    "musclesTargeted": ["Upper Pectoralis", "Anterior Deltoid", "Triceps"],
+    "category": "compound",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone at the foot end of the incline bench on the floor, angled up toward you.",
+    "stepByStepCues": [
+      "Set bench to 30–45 degrees, feet flat on floor",
+      "Grip slightly wider than shoulder-width",
+      "Retract shoulder blades into the pad",
+      "Lower bar to upper chest with elbows at 60 degrees",
+      "Press up and slightly toward the rack"
+    ],
+    "commonMistakes": ["Elbow flare", "Bar bouncing off chest", "Losing shoulder blade retraction"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Excessive elbow flare",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees",
+        "severity": "warning",
+        "midRepCue": "tuck elbows",
+        "debriefCue": "Your elbows are flaring on the incline press — tuck them to protect your shoulder joint."
+      }
+    ]
+  },
+  {
+    "id": "db_row",
+    "name": "Dumbbell Row",
+    "musclesTargeted": ["Latissimus Dorsi", "Rhomboids", "Rear Deltoid", "Biceps"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the bench beside you at waist height, camera facing your working side.",
+    "stepByStepCues": [
+      "Place one hand and knee on the bench for support",
+      "Back is flat and parallel to the floor",
+      "Pull dumbbell to your hip, driving elbow back",
+      "Squeeze the lat at the top — pause briefly",
+      "Lower slowly with full arm extension at the bottom"
+    ],
+    "commonMistakes": ["Torso rotation to lift weight", "Elbow flaring wide", "Insufficient range of motion"],
+    "formRules": [
+      {
+        "id": "row_momentum",
+        "description": "Torso rotation — using body to swing weight",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoVelocity > 0.4",
+        "severity": "critical",
+        "midRepCue": "no rotation",
+        "debriefCue": "You're rotating your torso to lift the dumbbell — keep hips and shoulders square to the bench throughout."
+      }
+    ]
+  },
+  {
+    "id": "leg_press",
+    "name": "Leg Press",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the seat beside you or prop it against the machine frame to your side.",
+    "stepByStepCues": [
+      "Place feet shoulder-width on the platform, toes slightly out",
+      "Lower the platform until knees reach 90 degrees",
+      "Keep knees in line with your toes throughout",
+      "Push through the full foot — heels and toes",
+      "Don't lock out knees completely at the top"
+    ],
+    "commonMistakes": ["Knees caving inward", "Butt lifting off seat", "Locking out knees"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Knees caving inward",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeSpan < ankleSpan * 0.78",
+        "severity": "critical",
+        "midRepCue": "knees out",
+        "debriefCue": "Your knees are caving inward on the leg press — push them out in line with your toes."
+      }
+    ]
+  },
+  {
+    "id": "romanian_deadlift",
+    "name": "Romanian Deadlift",
+    "musclesTargeted": ["Hamstrings", "Glutes", "Erector Spinae"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a plate, about 2 meters to your side.",
+    "stepByStepCues": [
+      "Stand hip-width, bar or dumbbells at hip height",
+      "Push hips back, maintaining a long neutral spine",
+      "Lower weight along your legs until you feel hamstring tension",
+      "Drive hips forward to return — squeeze glutes at the top",
+      "Keep shoulders retracted throughout the movement"
+    ],
+    "commonMistakes": ["Spine rounding", "Bending at the knees too much", "Bar drifting from legs"],
+    "formRules": [
+      {
+        "id": "deadlift_spine",
+        "description": "Spine rounding during the hinge",
+        "jointKeypoints": ["leftShoulder", "leftHip", "neck"],
+        "errorCondition": "spineAngleDeviation > 15 degrees",
+        "severity": "critical",
+        "midRepCue": "chest up",
+        "debriefCue": "Your back is rounding on the RDL — push your chest up and hinge from the hips, not the lower back."
+      }
+    ]
+  },
+  {
+    "id": "goblet_squat",
+    "name": "Goblet Squat",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Core", "Upper Back"],
+    "category": "compound",
+    "cameraAngle": "45° diagonal",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a dumbbell, about 2 meters away at 45 degrees.",
+    "stepByStepCues": [
+      "Hold dumbbell or kettlebell at chest, elbows pointing down",
+      "Feet slightly wider than shoulder-width, toes out",
+      "Squat down keeping chest tall and weight on heels",
+      "Drive knees out over toes throughout the descent",
+      "Stand by driving through the floor and extending hips"
+    ],
+    "commonMistakes": ["Knees caving", "Chest collapsing forward", "Insufficient depth"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Knee valgus — knees caving inward",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeSpan < ankleSpan * 0.78",
+        "severity": "critical",
+        "midRepCue": "knees out",
+        "debriefCue": "Your knees caved on the goblet squat — push them out and try a slightly wider stance."
+      },
+      {
+        "id": "squat_depth",
+        "description": "Insufficient depth",
+        "jointKeypoints": ["leftHip", "leftKnee"],
+        "errorCondition": "hipY < kneeY at bottom",
+        "severity": "warning",
+        "midRepCue": "sit deeper",
+        "debriefCue": "You're not hitting depth on the goblet squat — this movement allows great depth so aim for hips below knees."
+      }
+    ]
+  },
+  {
+    "id": "hip_thrust",
+    "name": "Hip Thrust",
+    "musclesTargeted": ["Glutes", "Hamstrings", "Core"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a plate.",
+    "stepByStepCues": [
+      "Upper back against bench, feet flat on floor hip-width",
+      "Bar or plate across hip crease with padding",
+      "Drive through heels to thrust hips toward ceiling",
+      "Squeeze glutes hard at the top — body forms a straight line",
+      "Lower under control until just above the floor"
+    ],
+    "commonMistakes": ["Lumbar hyperextension at top", "Feet too close or far", "Not reaching full hip extension"],
+    "formRules": [
+      {
+        "id": "ohp_back_arch",
+        "description": "Lumbar hyperextension at top of thrust",
+        "jointKeypoints": ["leftShoulder", "leftHip", "leftKnee"],
+        "errorCondition": "lumbarAngle > 150 degrees",
+        "severity": "warning",
+        "midRepCue": "tuck pelvis",
+        "debriefCue": "You're overextending your lower back at the top — squeeze your glutes and tuck your pelvis for a neutral spine."
+      }
+    ]
+  },
+  {
+    "id": "face_pull",
+    "name": "Face Pull",
+    "musclesTargeted": ["Rear Deltoid", "External Rotators", "Rhomboids"],
+    "category": "cable",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor or a bench 2 meters to your side at waist height.",
+    "stepByStepCues": [
+      "Set cable at or above head height with rope attachment",
+      "Step back, arms extended, slight lean away from cable",
+      "Pull rope to face level, elbows finishing high and wide",
+      "Externally rotate at end — thumbs pointing back",
+      "Return slowly with full arm extension"
+    ],
+    "commonMistakes": ["Elbows dropping below shoulders", "Using body momentum", "Shrugging traps"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Shoulder shrug — traps dominating",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline",
+        "severity": "warning",
+        "midRepCue": "drop traps",
+        "debriefCue": "Your traps are shrugging on the face pull — keep shoulders depressed and focus on pulling with rear delts."
+      }
+    ]
+  },
+  {
+    "id": "lat_pulldown",
+    "name": "Lat Pulldown",
+    "musclesTargeted": ["Latissimus Dorsi", "Biceps", "Rear Deltoid"],
+    "category": "cable",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the weight stack in front of you at chest height, camera facing you.",
+    "stepByStepCues": [
+      "Grip bar slightly wider than shoulder-width",
+      "Lean back slightly, chest up, shoulders packed down",
+      "Pull bar to upper chest, driving elbows toward hips",
+      "Squeeze lats at the bottom — pause briefly",
+      "Return bar slowly to full arm extension"
+    ],
+    "commonMistakes": ["Shoulder shrugging", "Using body swing", "Pulling behind the neck"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Shoulder shrugging — traps taking over",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline by 15px",
+        "severity": "critical",
+        "midRepCue": "pack shoulders",
+        "debriefCue": "Your shoulders are shrugging up on the pulldown — depress your scapula first, then pull."
+      }
+    ]
+  },
+  {
+    "id": "cable_fly",
+    "name": "Cable Fly",
+    "musclesTargeted": ["Pectoralis Major", "Anterior Deltoid"],
+    "category": "cable",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the floor in front of you, leaning against a weight plate, camera angled up.",
+    "stepByStepCues": [
+      "Stand between cable towers, handles at chest height",
+      "Step forward slightly, staggered stance for balance",
+      "Arms extended with slight bend in elbows — maintain throughout",
+      "Bring handles together in a hugging arc",
+      "Squeeze chest at the peak, then return with control"
+    ],
+    "commonMistakes": ["Bending elbows too much", "Leaning too far forward", "Using momentum"],
+    "formRules": [
+      {
+        "id": "pushdown_elbow",
+        "description": "Elbows bending excessively — turning into a press",
+        "jointKeypoints": ["leftElbow", "leftShoulder"],
+        "errorCondition": "elbowX > shoulderX by more than 25px",
+        "severity": "warning",
+        "midRepCue": "soft elbows",
+        "debriefCue": "You're bending your elbows too much — maintain a fixed slight bend and let the chest do the work."
+      }
+    ]
+  },
+  {
+    "id": "hammer_curl",
+    "name": "Hammer Curl",
+    "musclesTargeted": ["Brachialis", "Brachioradialis", "Biceps"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the bench beside you at waist height, camera facing your side.",
+    "stepByStepCues": [
+      "Stand tall, dumbbells at sides with palms facing each other",
+      "Keep elbows pinned to your sides",
+      "Curl dumbbell up keeping neutral wrist position",
+      "Squeeze at the top, then lower under control",
+      "Fully extend at the bottom before the next rep"
+    ],
+    "commonMistakes": ["Elbow drift", "Wrist deviation", "Swinging for momentum"],
+    "formRules": [
+      {
+        "id": "curl_elbow",
+        "description": "Elbow drifting forward",
+        "jointKeypoints": ["leftElbow", "leftShoulder"],
+        "errorCondition": "elbowX > shoulderX by more than 20px",
+        "severity": "warning",
+        "midRepCue": "elbows back",
+        "debriefCue": "Your elbows are drifting on the hammer curl — pin them to your sides for full brachialis engagement."
+      }
+    ]
+  },
+  {
+    "id": "skull_crusher",
+    "name": "Skull Crusher",
+    "musclesTargeted": ["Triceps Long Head", "Triceps Lateral Head"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a plate.",
+    "stepByStepCues": [
+      "Lie on bench, bar at arm's length above chest",
+      "Upper arms vertical — keep them there throughout",
+      "Lower bar by bending only at the elbows",
+      "Bar descends toward forehead or just behind",
+      "Extend back to start, squeezing triceps at the top"
+    ],
+    "commonMistakes": ["Elbows flaring out", "Shoulders dropping to assist", "Rushing the eccentric"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Elbow flare during skull crusher",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees",
+        "severity": "warning",
+        "midRepCue": "elbows in",
+        "debriefCue": "Your elbows are flaring out — keep them pointing straight up and move only from the elbow joint."
+      }
+    ]
+  },
+  {
+    "id": "leg_extension",
+    "name": "Leg Extension",
+    "musclesTargeted": ["Quadriceps"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the machine seat beside you or on the floor at your side.",
+    "stepByStepCues": [
+      "Sit upright with back against pad, ankles behind the roller",
+      "Extend legs fully — squeeze quads hard at the top",
+      "Lower slowly over 3 seconds to starting position",
+      "Keep toes pointing forward, not flared",
+      "Avoid jerking — controlled movement only"
+    ],
+    "commonMistakes": ["Knee tracking outward", "Rushing the eccentric", "Lifting hips off seat"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Knee tracking outward",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeXOffset deviation > 15px",
+        "severity": "warning",
+        "midRepCue": "track knees",
+        "debriefCue": "Your knees are tracking outward on the leg extension — align them with your toes throughout."
+      }
+    ]
+  },
+  {
+    "id": "leg_curl",
+    "name": "Leg Curl",
+    "musclesTargeted": ["Hamstrings", "Gastrocnemius"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a weight plate.",
+    "stepByStepCues": [
+      "Lie face down, ankles under the roller pad",
+      "Keep hips pressed firmly into the bench",
+      "Curl heels toward your glutes in a controlled arc",
+      "Squeeze hamstrings fully at the top",
+      "Lower slowly — don't slam the weight stack"
+    ],
+    "commonMistakes": ["Hips lifting off the bench", "Momentum on the concentric", "Incomplete range of motion"],
+    "formRules": [
+      {
+        "id": "cable_row_rock",
+        "description": "Hips lifting off the pad",
+        "jointKeypoints": ["leftShoulder", "leftHip"],
+        "errorCondition": "torsoAngleChange > 12 degrees",
+        "severity": "critical",
+        "midRepCue": "hips down",
+        "debriefCue": "Your hips are lifting on the leg curl — press them firmly into the pad and reduce the weight if needed."
+      }
+    ]
+  },
+  {
+    "id": "calf_raise",
+    "name": "Calf Raise",
+    "musclesTargeted": ["Gastrocnemius", "Soleus"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a dumbbell.",
+    "stepByStepCues": [
+      "Stand with balls of feet on an elevated surface",
+      "Lower heels below platform level for a full stretch",
+      "Rise as high as possible onto the balls of your feet",
+      "Hold the peak contraction for 1 second",
+      "Lower slowly — 3 seconds down"
+    ],
+    "commonMistakes": ["Bouncing at the bottom", "Insufficient range of motion", "Leaning forward"],
+    "formRules": [
+      {
+        "id": "deadlift_spine",
+        "description": "Forward lean — spine not neutral",
+        "jointKeypoints": ["leftShoulder", "leftHip", "neck"],
+        "errorCondition": "spineAngleDeviation > 15 degrees",
+        "severity": "warning",
+        "midRepCue": "stand tall",
+        "debriefCue": "You're leaning forward on the calf raise — keep your torso upright and let only your ankles move."
+      }
+    ]
+  },
+  {
+    "id": "front_raise",
+    "name": "Front Raise",
+    "musclesTargeted": ["Anterior Deltoid", "Clavicular Pectoralis"],
+    "category": "shoulder",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the bench beside you at waist height, camera facing your side.",
+    "stepByStepCues": [
+      "Stand tall, dumbbell in each hand at thigh height, palms down",
+      "Raise one or both arms to shoulder height",
+      "Keep a slight bend in the elbow throughout",
+      "Don't swing or lean back — control the weight",
+      "Lower slowly to starting position"
+    ],
+    "commonMistakes": ["Torso leaning back for momentum", "Arms going above shoulder height", "Shrugging shoulders"],
+    "formRules": [
+      {
+        "id": "lateral_lean",
+        "description": "Torso leaning back for momentum",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoLateralTilt > 10 degrees",
+        "severity": "warning",
+        "midRepCue": "stay upright",
+        "debriefCue": "You're leaning back to swing the weight up — lower the dumbbells and raise with strict shoulder control."
+      }
+    ]
+  },
+  {
+    "id": "reverse_fly",
+    "name": "Reverse Fly",
+    "musclesTargeted": ["Rear Deltoid", "Rhomboids", "Middle Trapezius"],
+    "category": "shoulder",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a plate.",
+    "stepByStepCues": [
+      "Hinge forward 45–90 degrees, dumbbells hanging below chest",
+      "Keep a slight bend in the elbows throughout",
+      "Raise arms out to the sides leading with the elbows",
+      "Squeeze rear delts at the top — pause briefly",
+      "Lower under control, maintaining hinge angle"
+    ],
+    "commonMistakes": ["Shoulder shrugging", "Swinging torso upright", "Elbows bending too much"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Shoulder shrugging — traps dominating the movement",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline by 15px",
+        "severity": "warning",
+        "midRepCue": "drop traps",
+        "debriefCue": "Your traps are shrugging on the reverse fly — keep shoulders depressed and drive your elbows up and back."
+      }
+    ]
+  },
+  {
+    "id": "arnold_press",
+    "name": "Arnold Press",
+    "musclesTargeted": ["Anterior Deltoid", "Lateral Deltoid", "Triceps"],
+    "category": "shoulder",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the dumbbell rack at chest height, camera facing you directly.",
+    "stepByStepCues": [
+      "Sit upright, dumbbells at shoulder height, palms facing you",
+      "Rotate palms outward as you press up",
+      "Finish with palms facing forward at full extension",
+      "Reverse the rotation as you lower back to start",
+      "Keep core braced — no lower back arch"
+    ],
+    "commonMistakes": ["Lower back arching", "Incomplete rotation", "Rushing the press"],
+    "formRules": [
+      {
+        "id": "ohp_back_arch",
+        "description": "Excessive lower back arch",
+        "jointKeypoints": ["leftShoulder", "leftHip", "leftKnee"],
+        "errorCondition": "lumbarAngle > 20 degrees hyperextension",
+        "severity": "critical",
+        "midRepCue": "brace core",
+        "debriefCue": "You're arching your lower back on the Arnold press — brace your core and squeeze your glutes throughout."
+      }
+    ]
+  },
+  {
+    "id": "jumping_jack",
+    "name": "Jumping Jack",
+    "musclesTargeted": ["Full Body", "Cardiovascular System"],
+    "category": "cardio",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a stable surface facing you at chest height, about 2-3 meters away.",
+    "stepByStepCues": [
+      "Stand with feet together, arms at your sides",
+      "Jump feet out to shoulder width while raising arms overhead",
+      "Jump back to starting position simultaneously",
+      "Keep a slight bend in your knees to cushion each landing",
+      "Maintain a steady, controlled rhythm throughout"
+    ],
+    "commonMistakes": ["Landing with straight knees", "Arms not fully extending overhead", "Uncontrolled tempo"],
+    "formRules": []
+  },
+  {
+    "id": "burpee",
+    "name": "Burpee",
+    "musclesTargeted": ["Full Body", "Core", "Cardiovascular System"],
+    "category": "cardio",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a stable surface facing you at chest height, about 2-3 meters away.",
+    "stepByStepCues": [
+      "Stand tall, feet shoulder-width apart",
+      "Drop hands to the floor and jump feet back to a plank position",
+      "Perform a push-up (optional), then jump feet back to hands",
+      "Explosively jump up with arms overhead",
+      "Land softly with bent knees and immediately repeat"
+    ],
+    "commonMistakes": ["Sagging hips in plank", "Not fully extending at the top jump", "Rushing and losing form"],
+    "formRules": []
+  },
+  {
+    "id": "mountain_climber",
+    "name": "Mountain Climber",
+    "musclesTargeted": ["Core", "Hip Flexors", "Shoulders", "Cardiovascular System"],
+    "category": "cardio",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a stable surface facing you at chest height, about 2-3 meters away.",
+    "stepByStepCues": [
+      "Start in a high plank: wrists under shoulders, body in a straight line",
+      "Drive one knee toward your chest while keeping hips level",
+      "Quickly switch legs in a running motion",
+      "Keep core braced throughout — no hip bouncing",
+      "Maintain a steady pace, faster as you build endurance"
+    ],
+    "commonMistakes": ["Hips rising too high", "Not driving knees fully forward", "Losing plank alignment"],
+    "formRules": []
+  },
+  {
+    "id": "high_knees",
+    "name": "High Knees",
+    "musclesTargeted": ["Hip Flexors", "Quadriceps", "Core", "Cardiovascular System"],
+    "category": "cardio",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a stable surface facing you at chest height, about 2-3 meters away.",
+    "stepByStepCues": [
+      "Stand tall with feet hip-width apart",
+      "Run in place, driving knees up to hip height",
+      "Pump arms in opposition to your legs",
+      "Land on the balls of your feet softly",
+      "Keep chest up and core engaged throughout"
+    ],
+    "commonMistakes": ["Knees not reaching hip height", "Leaning back too far", "Looking down instead of forward"],
+    "formRules": []
+  },
+  {
+    "id": "jump_squat",
+    "name": "Jump Squat",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings", "Calves", "Cardiovascular System"],
+    "category": "cardio",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a stable surface facing you at chest height, about 2-3 meters away.",
+    "stepByStepCues": [
+      "Stand with feet shoulder-width apart, toes slightly out",
+      "Squat down to parallel, keeping chest up and knees tracking toes",
+      "Explode upward, jumping as high as you can",
+      "Land softly with bent knees — absorb the impact quietly",
+      "Immediately descend into the next squat"
+    ],
+    "commonMistakes": ["Landing with straight knees", "Knees caving on landing", "Not squatting to parallel before jumping"],
+    "formRules": []
+  },
+  {
+    "id": "sumo_deadlift",
+    "name": "Sumo Deadlift",
+    "musclesTargeted": ["Inner Hamstrings", "Glutes", "Adductors", "Erector Spinae"],
+    "category": "compound",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a weight plate, about 2 meters in front of you.",
+    "stepByStepCues": [
+      "Stand wide with toes pointed out at 30–45 degrees",
+      "Grip the bar inside your legs, arms straight down",
+      "Chest up, lats tight, hips lower than conventional deadlift",
+      "Push the floor apart as you stand — drive knees out",
+      "Lock hips and knees simultaneously at the top"
+    ],
+    "commonMistakes": ["Knees caving inward", "Spine rounding", "Bar drifting forward from body"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Knee valgus — knees caving inward on the pull",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeSpan < ankleSpan * 0.78",
+        "severity": "critical",
+        "midRepCue": "knees out",
+        "debriefCue": "Your knees caved on the sumo deadlift — actively push them out in line with your toes as you pull."
+      },
+      {
+        "id": "deadlift_spine",
+        "description": "Spine rounding during the pull",
+        "jointKeypoints": ["leftShoulder", "leftHip", "neck"],
+        "errorCondition": "spineAngleDeviation > 15 degrees",
+        "severity": "critical",
+        "midRepCue": "chest up",
+        "debriefCue": "Your back is rounding on the sumo pull — think chest up and brace hard before breaking the floor."
+      }
+    ]
+  },
+  {
+    "id": "bulgarian_split_squat",
+    "name": "Bulgarian Split Squat",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings", "Hip Flexors"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a dumbbell.",
+    "stepByStepCues": [
+      "Place rear foot on a bench, laces down",
+      "Step forward far enough that your front shin stays vertical",
+      "Lower your rear knee toward the floor with control",
+      "Keep torso upright — don't lean excessively forward",
+      "Drive through the front heel to stand"
+    ],
+    "commonMistakes": ["Front knee caving inward", "Torso pitching forward", "Front foot too close to bench"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Front knee caving inward",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeXOffset < ankleXOffset by more than 10px",
+        "severity": "critical",
+        "midRepCue": "knee out",
+        "debriefCue": "Your front knee is caving on the split squat — drive it out in line with your second toe."
+      }
+    ]
+  },
+  {
+    "id": "close_grip_bench",
+    "name": "Close Grip Bench Press",
+    "musclesTargeted": ["Triceps", "Pectoralis Major", "Anterior Deltoid"],
+    "category": "compound",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the floor at the head of the bench, camera angled up toward you.",
+    "stepByStepCues": [
+      "Grip bar shoulder-width or slightly narrower, wrists straight",
+      "Unrack with elbows close to your sides",
+      "Lower bar to lower chest, keeping elbows tucked at 30 degrees",
+      "Press straight up, squeezing triceps at full extension",
+      "Keep shoulder blades retracted into the bench throughout"
+    ],
+    "commonMistakes": ["Elbows flaring out", "Grip too narrow causing wrist pain", "Bar bouncing off chest"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Elbow flare — arms spreading wide",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees",
+        "severity": "warning",
+        "midRepCue": "tuck elbows",
+        "debriefCue": "Your elbows are flaring on the close grip press — keep them at 30 degrees to target the triceps effectively."
+      }
+    ]
+  },
+  {
+    "id": "chest_dip",
+    "name": "Chest Dip",
+    "musclesTargeted": ["Pectoralis Major", "Anterior Deltoid", "Triceps"],
+    "category": "compound",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a dumbbell.",
+    "stepByStepCues": [
+      "Grip parallel bars, arms locked out, lean chest forward",
+      "Lean torso forward at 20–30 degrees for chest emphasis",
+      "Lower until elbows reach 90 degrees or upper arms are parallel to floor",
+      "Keep elbows tracking backward — not flaring to the sides",
+      "Press back to full lockout through the palms"
+    ],
+    "commonMistakes": ["Not leaning forward enough", "Elbow flare", "Dropping too fast"],
+    "formRules": [
+      {
+        "id": "bench_elbow_flare",
+        "description": "Elbows flaring outward",
+        "jointKeypoints": ["leftElbow", "leftShoulder", "rightElbow", "rightShoulder"],
+        "errorCondition": "elbowFlareAngle > 75 degrees",
+        "severity": "warning",
+        "midRepCue": "elbows back",
+        "debriefCue": "Your elbows are flaring on the chest dip — keep them pointing backward to protect your shoulder joint."
+      }
+    ]
+  },
+  {
+    "id": "concentration_curl",
+    "name": "Concentration Curl",
+    "musclesTargeted": ["Biceps", "Brachialis"],
+    "category": "isolation",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a bench in front of you at waist height, camera facing you.",
+    "stepByStepCues": [
+      "Sit on a bench, elbow braced against your inner thigh",
+      "Dumbbell hanging at arm's length between your legs",
+      "Curl the dumbbell up, rotating palm outward at the top",
+      "Squeeze the bicep peak — hold briefly at the top",
+      "Lower slowly to full extension"
+    ],
+    "commonMistakes": ["Elbow leaving the thigh", "Torso rocking to assist", "Incomplete range of motion"],
+    "formRules": [
+      {
+        "id": "curl_swing",
+        "description": "Torso rocking — using body momentum",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoVelocity > 0.3 during concentric phase",
+        "severity": "critical",
+        "midRepCue": "stay still",
+        "debriefCue": "You're rocking to lift the weight — keep your torso fixed and let only your elbow flex."
+      }
+    ]
+  },
+  {
+    "id": "preacher_curl",
+    "name": "Preacher Curl",
+    "musclesTargeted": ["Biceps", "Brachialis"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a plate.",
+    "stepByStepCues": [
+      "Sit at preacher bench, upper arms flat on the pad",
+      "Grip EZ bar or dumbbell, arms nearly fully extended",
+      "Curl up without lifting shoulders off the pad",
+      "Squeeze at the top — full contraction",
+      "Lower slowly to near-full extension — don't hyperextend at the bottom"
+    ],
+    "commonMistakes": ["Shoulders rising off the pad", "Slamming down at the bottom", "Incomplete contraction"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Shoulders rising off the pad",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline by 15px",
+        "severity": "warning",
+        "midRepCue": "shoulders down",
+        "debriefCue": "Your shoulders are rising on the preacher curl — keep them pinned to the pad for full bicep isolation."
+      }
+    ]
+  },
+  {
+    "id": "tricep_kickback",
+    "name": "Tricep Kickback",
+    "musclesTargeted": ["Triceps Long Head", "Triceps Lateral Head"],
+    "category": "isolation",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the bench beside you at waist height, camera facing your side.",
+    "stepByStepCues": [
+      "Hinge forward, upper arm parallel to the floor and pinned to side",
+      "Elbow at 90 degrees — this is the start position",
+      "Extend forearm back until arm is fully straight",
+      "Squeeze tricep hard at full extension",
+      "Return forearm slowly — upper arm stays fixed throughout"
+    ],
+    "commonMistakes": ["Upper arm dropping during extension", "Swinging for momentum", "Incomplete extension"],
+    "formRules": [
+      {
+        "id": "cable_row_rock",
+        "description": "Upper arm dropping — elbow not staying parallel to floor",
+        "jointKeypoints": ["leftShoulder", "leftHip"],
+        "errorCondition": "torsoAngleChange > 12 degrees",
+        "severity": "warning",
+        "midRepCue": "elbow up",
+        "debriefCue": "Your upper arm is dropping during the kickback — keep it parallel to the floor throughout the movement."
+      }
+    ]
+  },
+  {
+    "id": "seated_db_curl",
+    "name": "Seated Dumbbell Curl",
+    "musclesTargeted": ["Biceps", "Brachialis"],
+    "category": "isolation",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the dumbbell rack at chest height, camera facing you.",
+    "stepByStepCues": [
+      "Sit upright on a bench, dumbbells hanging at sides",
+      "Curl both or alternating, keeping elbows fixed at your sides",
+      "Supinate wrists at the top — little finger rotates up",
+      "Squeeze biceps fully at peak contraction",
+      "Lower under control to full extension"
+    ],
+    "commonMistakes": ["Torso swinging to initiate lift", "Elbows drifting forward", "Incomplete supination"],
+    "formRules": [
+      {
+        "id": "curl_swing",
+        "description": "Torso swinging for momentum",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoVelocity > 0.3 during concentric phase",
+        "severity": "critical",
+        "midRepCue": "sit still",
+        "debriefCue": "You're swinging your torso — sit upright, keep your back against the pad, and curl with control."
+      }
+    ]
+  },
+  {
+    "id": "upright_row",
+    "name": "Upright Row",
+    "musclesTargeted": ["Lateral Deltoid", "Trapezius", "Biceps"],
+    "category": "shoulder",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the dumbbell rack at chest height, camera facing you directly.",
+    "stepByStepCues": [
+      "Stand with barbell or dumbbells at hip level, overhand grip",
+      "Pull elbows high and wide, leading the movement",
+      "Raise until elbows are at or above shoulder height",
+      "Bar or dumbbells stay close to the body throughout",
+      "Lower under control to starting position"
+    ],
+    "commonMistakes": ["Elbows not reaching shoulder height", "Wrists bending under load", "Shrugging traps excessively"],
+    "formRules": [
+      {
+        "id": "lateral_shrug",
+        "description": "Traps over-shrugging instead of deltoids driving",
+        "jointKeypoints": ["leftShoulder", "leftEar", "rightShoulder", "rightEar"],
+        "errorCondition": "shoulderToEarDistance < baseline by 15px",
+        "severity": "warning",
+        "midRepCue": "lead with elbows",
+        "debriefCue": "Your traps are dominating the upright row — focus on driving your elbows high and wide, not just lifting the bar."
+      }
+    ]
+  },
+  {
+    "id": "cable_lateral_raise",
+    "name": "Cable Lateral Raise",
+    "musclesTargeted": ["Lateral Deltoid", "Supraspinatus"],
+    "category": "cable",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on the cable stack at chest height, camera facing you directly.",
+    "stepByStepCues": [
+      "Stand beside the cable, handle in the far hand, cable crossing low",
+      "Slight bend in the elbow throughout the movement",
+      "Raise arm out to your side to shoulder height",
+      "Keep your torso upright — no side lean",
+      "Lower slowly, resisting the cable all the way down"
+    ],
+    "commonMistakes": ["Leaning away to generate momentum", "Elbow dropping below wrist", "Shrugging shoulder"],
+    "formRules": [
+      {
+        "id": "lateral_lean",
+        "description": "Torso leaning away from the cable for momentum",
+        "jointKeypoints": ["leftShoulder", "rightShoulder", "leftHip", "rightHip"],
+        "errorCondition": "torsoLateralTilt > 8 degrees",
+        "severity": "warning",
+        "midRepCue": "stand tall",
+        "debriefCue": "You're leaning away to swing the cable up — stand upright and lift with shoulder strength only."
+      }
+    ]
+  },
+  {
+    "id": "cable_bicep_curl",
+    "name": "Cable Bicep Curl",
+    "musclesTargeted": ["Biceps", "Brachialis"],
+    "category": "cable",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a plate, 2 meters to your side.",
+    "stepByStepCues": [
+      "Stand facing the low cable, handle in both hands underhand",
+      "Elbows pinned to sides at the start",
+      "Curl the handle up to chin level",
+      "Squeeze biceps at the top — cable maintains tension throughout",
+      "Lower slowly — the cable keeps constant load unlike free weights"
+    ],
+    "commonMistakes": ["Elbows drifting forward", "Leaning back", "Rushing the eccentric"],
+    "formRules": [
+      {
+        "id": "curl_elbow",
+        "description": "Elbows drifting forward off your sides",
+        "jointKeypoints": ["leftElbow", "leftShoulder"],
+        "errorCondition": "elbowX > shoulderX by more than 20px",
+        "severity": "warning",
+        "midRepCue": "elbows back",
+        "debriefCue": "Your elbows are drifting forward on the cable curl — pin them to your sides for full bicep engagement."
+      }
+    ]
+  },
+  {
+    "id": "straight_arm_pulldown",
+    "name": "Straight-Arm Pulldown",
+    "musclesTargeted": ["Latissimus Dorsi", "Teres Major", "Core"],
+    "category": "cable",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a plate, 2 meters to your side.",
+    "stepByStepCues": [
+      "Stand facing high cable, bar in both hands, hinge slightly at hips",
+      "Arms extended with a very slight bend in the elbows",
+      "Pull bar down in an arc to your thighs, arms staying straight",
+      "Squeeze lats hard at the bottom — bar reaches hip level",
+      "Return slowly with full lat stretch at the top"
+    ],
+    "commonMistakes": ["Bending elbows into a pulldown", "Not hinging enough at hips", "Shrugging shoulders"],
+    "formRules": [
+      {
+        "id": "pushdown_elbow",
+        "description": "Elbows bending — converting to a lat pulldown",
+        "jointKeypoints": ["leftElbow", "leftShoulder"],
+        "errorCondition": "elbowX > shoulderX by more than 25px",
+        "severity": "warning",
+        "midRepCue": "straight arms",
+        "debriefCue": "Your elbows are bending on the straight-arm pulldown — keep arms nearly locked and pull with your lats."
+      }
+    ]
+  },
+  {
+    "id": "cable_crunch",
+    "name": "Cable Crunch",
+    "musclesTargeted": ["Rectus Abdominis", "Obliques"],
+    "category": "cable",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor leaning against a plate, 2 meters to your side.",
+    "stepByStepCues": [
+      "Kneel facing the cable, rope attachment at high pulley",
+      "Hold rope beside your head, elbows pointing down",
+      "Crunch downward by flexing your spine — not your hips",
+      "Round your upper back to fully contract the abs",
+      "Return slowly — feel the stretch at the top"
+    ],
+    "commonMistakes": ["Hinging at hips instead of flexing spine", "Pulling with arms", "Not contracting fully at the bottom"],
+    "formRules": [
+      {
+        "id": "ohp_back_arch",
+        "description": "Hinging at hips instead of flexing spine",
+        "jointKeypoints": ["leftShoulder", "leftHip", "leftKnee"],
+        "errorCondition": "lumbarAngle > 155 degrees at bottom",
+        "severity": "critical",
+        "midRepCue": "curl spine",
+        "debriefCue": "You're hinging at the hips not crunching — keep hips still and focus on rounding your spine."
+      }
+    ]
+  },
+  {
+    "id": "box_jump",
+    "name": "Box Jump",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings", "Calves", "Cardiovascular System"],
+    "category": "cardio",
+    "cameraAngle": "Side profile",
+    "phonePlacementInstruction": "Place your phone on the floor 2 meters to your side, leaning against a weight plate.",
+    "stepByStepCues": [
+      "Stand in front of the box, feet shoulder-width",
+      "Load hips by sitting into a quarter squat",
+      "Swing arms and explode upward — land softly on the box",
+      "Land with knees bent, feet flat on the box",
+      "Step down one foot at a time — do not jump down"
+    ],
+    "commonMistakes": ["Landing stiff-legged", "Knees caving on landing", "Jumping down instead of stepping"],
+    "formRules": []
+  },
+  {
+    "id": "step_up",
+    "name": "Step Up",
+    "musclesTargeted": ["Quadriceps", "Glutes", "Hamstrings", "Core"],
+    "category": "cardio",
+    "cameraAngle": "Front facing",
+    "phonePlacementInstruction": "Place your phone on a stable surface facing you at chest height, about 2 meters away.",
+    "stepByStepCues": [
+      "Stand in front of a bench or box at knee height",
+      "Step one foot fully onto the surface",
+      "Drive through the heel of the raised foot to stand",
+      "Keep chest tall — don't lean forward excessively",
+      "Step down with control and alternate legs"
+    ],
+    "commonMistakes": ["Knee caving inward on the step", "Pushing off the back foot", "Forward torso lean"],
+    "formRules": [
+      {
+        "id": "squat_valgus",
+        "description": "Knee caving inward on the step",
+        "jointKeypoints": ["leftKnee", "leftAnkle", "rightKnee", "rightAnkle"],
+        "errorCondition": "kneeXOffset < ankleXOffset by more than 10px",
+        "severity": "warning",
+        "midRepCue": "knee out",
+        "debriefCue": "Your knee is caving inward on the step up — drive it out in line with your second toe as you push up."
+      }
+    ]
+  }
+]

@@ -5,10 +5,12 @@ struct WorkoutView: View {
     var initialExerciseName: String? = nil
 
     @State private var selectedExercise: Exercise?
+    @State private var pendingExercise: Exercise? = nil
     @State private var showDebrief = false
     @State private var errorFlash: String? = nil
     @State private var exercises: [Exercise] = []
     @State private var selectedCategory: Exercise.Category? = nil
+    @State private var workoutEnded = false
 
     private static let allCategories: [Exercise.Category] = [.compound, .isolation, .shoulder, .cable, .cardio]
 
@@ -29,7 +31,9 @@ struct WorkoutView: View {
                         if let ex = selectedExercise { sessionManager.startSet(exercise: ex) }
                     },
                     endWorkoutAction: {
+                        workoutEnded = true
                         sessionManager.poseService.stop()
+                        sessionManager.endWorkout()
                         selectedExercise = nil
                         showDebrief = false
                     }
@@ -44,8 +48,21 @@ struct WorkoutView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.black, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .fullScreenCover(item: $pendingExercise) { ex in
+            ExerciseDemoView(exercise: ex) {
+                let started = ex
+                pendingExercise = nil
+                selectedExercise = started
+                sessionManager.startSet(exercise: started)
+            }
+        }
         .onAppear { loadExercises() }
-        .onDisappear { sessionManager.poseService.stop() }
+        .onDisappear {
+            guard !workoutEnded else { return }
+            workoutEnded = true
+            sessionManager.poseService.stop()
+            sessionManager.endWorkout()
+        }
         .onChange(of: sessionManager.session.sessionLog.count) {
             if !sessionManager.session.isSetActive && sessionManager.session.sessionLog.count > 0 {
                 showDebrief = true
@@ -65,9 +82,11 @@ struct WorkoutView: View {
                 VStack { activeHUD.padding(.top, 8); Spacer() }
             }
 
-            VStack {
-                HStack { Spacer(); aiProcessingBadge.padding(.top, 12).padding(.trailing, 16) }
-                Spacer()
+            if sessionManager.session.isSetActive {
+                VStack {
+                    HStack { Spacer(); aiProcessingBadge.padding(.top, 12).padding(.trailing, 16) }
+                    Spacer()
+                }
             }
 
             if let flash = errorFlash {
@@ -130,14 +149,8 @@ struct WorkoutView: View {
             }
             if let curl = sessionManager.fingerCurl.curlData {
                 let avgPIP = (curl.indexPIP + curl.middlePIP) / 2.0
-                let gripGood = avgPIP < 120
                 hudVertDivider
-                hudBlock(
-                    top: Image(systemName: gripGood ? "hand.raised.fill" : "hand.raised.slash.fill")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(gripGood ? DS.lime : Color.orange),
-                    label: "GRIP"
-                )
+                hudBlock(top: GripArcView(angle: avgPIP), label: "GRIP")
             }
         }
         .padding(.horizontal, 28).padding(.vertical, 14)
@@ -247,8 +260,7 @@ struct WorkoutView: View {
                     ) {
                         ForEach(filteredExercises) { exercise in
                             Button {
-                                selectedExercise = exercise
-                                sessionManager.startSet(exercise: exercise)
+                                pendingExercise = exercise
                             } label: {
                                 exerciseGridCard(exercise)
                             }
@@ -347,6 +359,8 @@ struct WorkoutView: View {
                 .padding(.horizontal, 20)
             }
 
+            micButton.padding(.horizontal, 20)
+
             Button {
                 sessionManager.poseService.stop()
                 sessionManager.endSet()
@@ -363,15 +377,60 @@ struct WorkoutView: View {
         }
     }
 
+    private var micButton: some View {
+        let listening = sessionManager.isListeningForVoice
+        let transcript = sessionManager.voiceTranscript
+        return VStack(spacing: 6) {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(listening ? Color.red.opacity(0.15) : DS.elevated)
+                        .frame(width: 36, height: 36)
+                    Image(systemName: listening ? "waveform" : "mic.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(listening ? Color.red : DS.textSecondary)
+                        .scaleEffect(listening ? 1.15 : 1.0)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true),
+                                   value: listening)
+                }
+                Text(transcript.isEmpty ? (listening ? "Listening…" : "Hold to ask your trainer")
+                     : transcript)
+                    .font(.caption)
+                    .foregroundStyle(listening ? DS.textPrimary : DS.textTertiary)
+                    .lineLimit(1)
+                Spacer()
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(listening ? Color.red.opacity(0.08) : DS.elevated)
+            .clipShape(RoundedRectangle(cornerRadius: DS.radiusSm, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.radiusSm, style: .continuous)
+                    .stroke(listening ? Color.red.opacity(0.3) : Color.clear, lineWidth: 1)
+            )
+            .animation(.easeInOut(duration: 0.2), value: listening)
+        }
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !sessionManager.isListeningForVoice {
+                        sessionManager.startVoiceInput()
+                    }
+                }
+                .onEnded { _ in
+                    sessionManager.stopVoiceInput()
+                }
+        )
+    }
+
     // MARK: - Helpers
 
     private func categoryColor(_ cat: Exercise.Category) -> Color {
         switch cat {
-        case .compound:  return .blue
-        case .isolation: return .purple
-        case .shoulder:  return .orange
-        case .cable:     return .teal
-        case .cardio:    return .red
+        case .compound:  return Color(red: 0.35, green: 0.60, blue: 1.00)
+        case .isolation: return Color(red: 0.72, green: 0.40, blue: 1.00)
+        case .shoulder:  return DS.orange
+        case .cable:     return Color(red: 0.20, green: 0.85, blue: 0.80)
+        case .cardio:    return DS.red
         }
     }
 
@@ -394,6 +453,40 @@ struct WorkoutView: View {
            let match = decoded.first(where: { $0.name == name }) {
             selectedExercise = match
             sessionManager.startSet(exercise: match)
+        }
+    }
+}
+
+// MARK: - GripArcView
+
+struct GripArcView: View {
+    let angle: Float  // degrees; lower = more curled = stronger grip
+
+    private var gripPercent: Double {
+        1.0 - (Double(max(60, min(160, angle))) - 60) / 100.0
+    }
+
+    private var color: Color {
+        switch angle {
+        case ..<110:  return DS.lime
+        case 110..<140: return .orange
+        default:        return .red
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .trim(from: 0.15, to: 0.85)
+                .stroke(DS.elevated, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                .rotationEffect(.degrees(90))
+                .frame(width: 38, height: 38)
+            Circle()
+                .trim(from: 0.15, to: 0.15 + 0.70 * gripPercent)
+                .stroke(color, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                .rotationEffect(.degrees(90))
+                .frame(width: 38, height: 38)
+                .animation(.easeOut(duration: 0.15), value: gripPercent)
         }
     }
 }

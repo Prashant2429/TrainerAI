@@ -1,9 +1,15 @@
 import SwiftUI
+import SwiftData
 
 struct OnboardingView: View {
+    @EnvironmentObject var sessionManager: SessionManager
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("userName") private var savedName = ""
+    @Environment(\.modelContext) private var modelContext
     @State private var profile = UserProfile.empty
+    @State private var isGeneratingPlan = false
+    @State private var selectedProvider: String = UserDefaults.standard.string(forKey: "AI_PROVIDER") ?? "nvidia"
+    @State private var apiKeyInput: String = KeychainService.load("AI_API_KEY") ?? ""
 
     var body: some View {
         ZStack {
@@ -13,9 +19,10 @@ struct OnboardingView: View {
                 VStack(spacing: 0) {
                     // Brand
                     VStack(spacing: 14) {
-                        Image(systemName: "figure.strengthtraining.traditional")
-                            .font(.system(size: 64))
-                            .foregroundStyle(DS.lime)
+                        Image("logo-mark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 72, height: 72)
                             .padding(.top, 70)
 
                         Text("GymTrainer AI")
@@ -134,13 +141,38 @@ struct OnboardingView: View {
                             .clipShape(RoundedRectangle(cornerRadius: DS.radiusSm, style: .continuous))
                         }
 
+                        formField(label: "AI Provider") {
+                            Picker("", selection: $selectedProvider) {
+                                Text("Anthropic").tag("anthropic")
+                                Text("NVIDIA").tag("nvidia")
+                                Text("AIMLAPI").tag("aimlapi")
+                            }
+                            .pickerStyle(.menu)
+                            .tint(DS.lime)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .background(DS.elevated)
+                            .clipShape(RoundedRectangle(cornerRadius: DS.radiusSm, style: .continuous))
+                        }
+
+                        formField(label: "AI API Key") {
+                            SecureField("Paste your API key", text: $apiKeyInput)
+                                .textFieldStyle(.plain)
+                                .foregroundStyle(DS.textPrimary)
+                                .tint(DS.lime)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .padding(12)
+                                .background(DS.elevated)
+                                .clipShape(RoundedRectangle(cornerRadius: DS.radiusSm, style: .continuous))
+                        }
+
                         // CTA
                         Button {
-                            savedName = profile.name
-                            hasCompletedOnboarding = true
+                            handleGetStarted()
                         } label: {
                             HStack(spacing: 8) {
-                                Text("Get Started").font(.headline)
+                                Text("Build My Plan").font(.headline)
                                 Image(systemName: "arrow.right").font(.callout.weight(.semibold))
                             }
                             .frame(maxWidth: .infinity, alignment: .center)
@@ -159,6 +191,51 @@ struct OnboardingView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .overlay {
+            if isGeneratingPlan {
+                ZStack {
+                    DS.bg.opacity(0.92).ignoresSafeArea()
+                    VStack(spacing: 20) {
+                        ProgressView().tint(DS.lime).scaleEffect(1.4)
+                        Text("Building your personalised plan...")
+                            .font(.callout.weight(.medium))
+                            .foregroundStyle(DS.textSecondary)
+                    }
+                }
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: isGeneratingPlan)
+    }
+
+    @MainActor
+    private func handleGetStarted() {
+        savedName = profile.name
+        if let encoded = try? JSONEncoder().encode(profile) {
+            UserDefaults.standard.set(encoded, forKey: "userProfile")
+        }
+        isGeneratingPlan = true
+        Task {
+            if let dto = await sessionManager.generatePlan(profile: profile) {
+                let days = dto.weeklyPlan.map { d in
+                    let exs = d.exercises.map {
+                        PlannedExercise(exerciseId: $0.exerciseId, sets: $0.sets,
+                                        reps: $0.reps, rest: $0.rest)
+                    }
+                    return PlannedDay(day: d.day, focus: d.focus, exercises: exs)
+                }
+                let plan = WorkoutPlan(createdAt: Date(), coachNote: dto.coachNote, weeklyDays: days)
+                modelContext.insert(plan)
+                try? modelContext.save()
+            }
+            UserDefaults.standard.set(selectedProvider, forKey: "AI_PROVIDER")
+            if apiKeyInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                KeychainService.delete("AI_API_KEY")
+            } else {
+                KeychainService.save("AI_API_KEY", value: apiKeyInput.trimmingCharacters(in: .whitespacesAndNewlines))
+            }
+            hasCompletedOnboarding = true
+        }
     }
 
     @ViewBuilder

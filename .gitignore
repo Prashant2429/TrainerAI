@@ -1,0 +1,27 @@
+# Claude local overrides — never commit
+CLAUDE.local.md
+.claude/session-state/
+
+# Xcode
+*.xcuserdata
+*.xcworkspace/xcuserdata
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environment / secrets
+.env
+.env.local
+*.key
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved

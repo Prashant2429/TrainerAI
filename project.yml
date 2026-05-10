@@ -1,0 +1,59 @@
+name: GymTrainerAI
+options:
+  bundleIdPrefix: com.prashant
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: 5.9
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  GymTrainerAI:
+    type: application
+    platform: iOS
+    sources:
+      - path: GymTrainerAI
+        excludes:
+          - "**/*.md"
+    resources:
+      - path: GymTrainerAI/Resources
+    info:
+      path: GymTrainerAI/Info.plist
+      properties:
+        UILaunchStoryboardName: LaunchScreen
+        NSCameraUsageDescription: "GymTrainerAI needs camera access to analyze your exercise form in real time."
+        NSMicrophoneUsageDescription: "GymTrainerAI uses your microphone to listen for voice commands and feedback."
+        NSSpeechRecognitionUsageDescription: "GymTrainerAI uses speech recognition so you can talk to your AI trainer hands-free."
+        UIBackgroundModes:
+          - audio
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.prashant.GymTrainerAI
+        DEVELOPMENT_TEAM: "NPYR32GRM3"
+        INFOPLIST_FILE: GymTrainerAI/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  GymTrainerAITests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: GymTrainerAITests
+        excludes:
+          - "**/.gitkeep"
+    dependencies:
+      - target: GymTrainerAI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.prashant.GymTrainerAITests
+        DEVELOPMENT_TEAM: "NPYR32GRM3"
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: 5.9
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"

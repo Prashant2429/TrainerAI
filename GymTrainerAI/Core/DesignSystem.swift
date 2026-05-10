@@ -5,6 +5,8 @@ enum DS {
     static let surface  = Color(red: 0.13, green: 0.13, blue: 0.15)
     static let elevated = Color(red: 0.19, green: 0.19, blue: 0.22)
     static let lime     = Color(red: 0.78, green: 1.00, blue: 0.18)
+    static let orange   = Color(red: 1.00, green: 0.62, blue: 0.18)
+    static let red      = Color(red: 1.00, green: 0.27, blue: 0.22)
 
     static let textPrimary   = Color.white
     static let textSecondary = Color.white.opacity(0.55)

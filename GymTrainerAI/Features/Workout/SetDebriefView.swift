@@ -6,6 +6,7 @@ struct SetDebriefView: View {
     let nextSetAction: () -> Void
     let endWorkoutAction: () -> Void
 
+    @AppStorage("preferredRestSeconds") private var preferredRestSeconds = 60
     @State private var animateRing = false
     @State private var restSeconds = 60
     @State private var restActive = true
@@ -24,6 +25,7 @@ struct SetDebriefView: View {
                     }
                     scoreRing
                     debriefCard.padding(.horizontal, 20)
+                    gripInsightsCard.padding(.horizontal, 20)
                     feedbackSection.padding(.horizontal, 20)
                 }
                 .padding(.bottom, 160)
@@ -34,6 +36,7 @@ struct SetDebriefView: View {
         }
         .preferredColorScheme(.dark)
         .onAppear {
+            restSeconds = preferredRestSeconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 withAnimation(.easeOut(duration: 0.9)) { animateRing = true }
             }
@@ -65,11 +68,20 @@ struct SetDebriefView: View {
     // MARK: - Rest badge (demoted from full section)
 
     private var restBadge: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             Image(systemName: "timer").font(.caption).foregroundStyle(DS.lime)
             Text("\(restSeconds)s rest")
                 .font(.system(size: 13, weight: .semibold)).foregroundStyle(DS.textPrimary)
                 .contentTransition(.numericText())
+                .frame(minWidth: 56, alignment: .center)
+            Button { adjustRest(-15) } label: {
+                Image(systemName: "minus").font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(DS.textSecondary)
+            }
+            Button { adjustRest(+15) } label: {
+                Image(systemName: "plus").font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(DS.textSecondary)
+            }
             Button("Skip") {
                 restTimer?.invalidate()
                 withAnimation { restActive = false }
@@ -79,6 +91,13 @@ struct SetDebriefView: View {
         .padding(.horizontal, 16).padding(.vertical, 9)
         .background(DS.elevated)
         .clipShape(Capsule())
+    }
+
+    private func adjustRest(_ delta: Int) {
+        restTimer?.invalidate()
+        restSeconds = max(15, restSeconds + delta)
+        preferredRestSeconds = restSeconds
+        if restSeconds > 0 { startRestTimer() }
     }
 
     // MARK: - Score ring (lime gradient)
@@ -132,6 +151,54 @@ struct SetDebriefView: View {
             .overlay(
                 RoundedRectangle(cornerRadius: DS.radiusMd, style: .continuous)
                     .stroke(DS.lime.opacity(0.22), lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: DS.radiusMd, style: .continuous))
+        }
+    }
+
+    // MARK: - Grip insights card
+
+    @ViewBuilder
+    private var gripInsightsCard: some View {
+        let timeline = setLog.gripTimeline
+        if timeline.count >= 2 {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "hand.raised.fill")
+                        .font(.caption).foregroundStyle(DS.lime)
+                    Text("Grip Analysis")
+                        .font(.caption.weight(.semibold)).foregroundStyle(DS.lime)
+                }
+
+                // Per-rep bar chart
+                HStack(alignment: .bottom, spacing: 6) {
+                    ForEach(Array(timeline.enumerated()), id: \.offset) { i, angle in
+                        let pct = 1.0 - (Double(max(60, min(160, angle))) - 60) / 100.0
+                        let barColor: Color = angle < 110 ? DS.lime : angle < 140 ? .orange : .red
+                        VStack(spacing: 4) {
+                            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                                .fill(barColor)
+                                .frame(width: 20, height: max(8, 52 * pct))
+                            Text("R\(i + 1)")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundStyle(DS.textTertiary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if !sessionManager.lastGripTip.isEmpty {
+                    Text(sessionManager.lastGripTip)
+                        .font(.caption).foregroundStyle(DS.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DS.elevated)
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.radiusMd, style: .continuous)
+                    .stroke(DS.lime.opacity(0.15), lineWidth: 1)
             )
             .clipShape(RoundedRectangle(cornerRadius: DS.radiusMd, style: .continuous))
         }

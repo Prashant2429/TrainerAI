@@ -1,4 +1,5 @@
 import SwiftUI
+import SceneKit
 
 // MARK: - Demo keyframe data
 
@@ -270,12 +271,12 @@ struct ExerciseDemoView: View {
                     }
                     .padding(.top, 32).padding(.horizontal, 20).padding(.bottom, 20)
 
-                    // Animated skeleton
+                    // 3D avatar
                     ZStack {
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .fill(DS.surface)
-                        SkeletonOverlay(pose: currentPose, errorJoints: [])
-                            .padding(12)
+                        HumanAvatarSceneView(joints: currentPose.joints)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     }
                     .frame(height: 260)
                     .padding(.horizontal, 20).padding(.bottom, 24)
@@ -331,5 +332,165 @@ struct ExerciseDemoView: View {
         .onReceive(timer) { _ in
             phase += 0.04  // ~5 second full cycle
         }
+    }
+}
+
+// MARK: - SceneKit 3D humanoid avatar
+
+struct HumanAvatarSceneView: UIViewRepresentable {
+
+    let joints: [String: CGPoint]
+
+    // Bone connections — each tuple is (startJoint, endJoint)
+    private static let bones: [(String, String)] = [
+        ("neck", "leftShoulder"),  ("neck", "rightShoulder"),
+        ("leftShoulder", "leftElbow"),   ("leftElbow", "leftWrist"),
+        ("rightShoulder", "rightElbow"), ("rightElbow", "rightWrist"),
+        ("leftShoulder", "leftHip"),     ("rightShoulder", "rightHip"),
+        ("leftHip", "rightHip"),
+        ("leftHip", "leftKnee"),   ("leftKnee", "leftAnkle"),
+        ("rightHip", "rightKnee"), ("rightKnee", "rightAnkle"),
+    ]
+
+    // Right-side joints sit slightly forward (+z), left-side slightly back (-z)
+    private static func zOffset(_ joint: String) -> Float {
+        joint.hasPrefix("right") ? 0.06 : joint.hasPrefix("left") ? -0.06 : 0
+    }
+
+    // Normalized 2D → SceneKit 3D
+    private static func toSCN(_ pt: CGPoint, z: Float = 0) -> SCNVector3 {
+        SCNVector3(Float(pt.x - 0.5) * 2.2, Float(-(pt.y - 0.5)) * 2.2, z)
+    }
+
+    // Point a capsule from a → b; updates its height and orientation
+    private static func orient(_ node: SCNNode, from a: SCNVector3, to b: SCNVector3) {
+        let dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z
+        let len = sqrt(dx*dx + dy*dy + dz*dz)
+        guard len > 0.001 else { return }
+        node.position = SCNVector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2)
+        (node.geometry as? SCNCapsule)?.height = CGFloat(len)
+        let ny = dy / len
+        let angle = acos(max(-1, min(1, ny)))
+        if angle < 0.001 { node.rotation = SCNVector4(0, 0, 1, 0); return }
+        if abs(angle - Float.pi) < 0.001 { node.rotation = SCNVector4(1, 0, 0, Float.pi); return }
+        // Cross product of (dx,dy,dz)/len with Y-axis (0,1,0) = (-dz, 0, dx)
+        let ax = -dz / len, az = dx / len
+        node.rotation = SCNVector4(ax, 0, az, angle)
+    }
+
+    private static func limeMaterial() -> SCNMaterial {
+        let mat = SCNMaterial()
+        mat.diffuse.contents  = UIColor(red: 0.78, green: 1.00, blue: 0.18, alpha: 1)
+        mat.specular.contents = UIColor.white
+        mat.shininess = 80
+        mat.lightingModel = .phong
+        return mat
+    }
+
+    func makeUIView(context: Context) -> SCNView {
+        let scnView = SCNView()
+        scnView.backgroundColor = .clear
+        scnView.antialiasingMode = .multisampling4X
+        scnView.allowsCameraControl = false
+        scnView.scene = buildScene()
+        return scnView
+    }
+
+    private func buildScene() -> SCNScene {
+        let scene = SCNScene()
+
+        // Camera
+        let cam = SCNNode()
+        cam.camera = SCNCamera()
+        cam.camera?.fieldOfView = 50
+        cam.position = SCNVector3(0, 0, 3.5)
+        scene.rootNode.addChildNode(cam)
+
+        // Ambient light
+        let ambient = SCNNode()
+        ambient.light = SCNLight()
+        ambient.light?.type = .ambient
+        ambient.light?.intensity = 400
+        scene.rootNode.addChildNode(ambient)
+
+        // Directional light from top-left
+        let omni = SCNNode()
+        omni.light = SCNLight()
+        omni.light?.type = .omni
+        omni.light?.intensity = 900
+        omni.position = SCNVector3(1.5, 2.5, 3)
+        scene.rootNode.addChildNode(omni)
+
+        // Head sphere
+        let headGeo = SCNSphere(radius: 0.13)
+        headGeo.firstMaterial = Self.limeMaterial()
+        let headNode = SCNNode(geometry: headGeo)
+        headNode.name = "joint_nose"
+        if let pt = joints["nose"] {
+            headNode.position = Self.toSCN(pt, z: 0)
+        }
+        scene.rootNode.addChildNode(headNode)
+
+        // Joint spheres at key nodes
+        for name in ["neck", "leftShoulder", "rightShoulder", "leftHip", "rightHip",
+                     "leftKnee", "rightKnee", "leftElbow", "rightElbow"] {
+            let geo = SCNSphere(radius: 0.055)
+            geo.firstMaterial = Self.limeMaterial()
+            let node = SCNNode(geometry: geo)
+            node.name = "joint_\(name)"
+            if let pt = joints[name] {
+                node.position = Self.toSCN(pt, z: Self.zOffset(name))
+            }
+            scene.rootNode.addChildNode(node)
+        }
+
+        // Bone capsules
+        for (a, b) in Self.bones {
+            let geo = SCNCapsule(capRadius: 0.048, height: 0.1)
+            geo.firstMaterial = Self.limeMaterial()
+            let node = SCNNode(geometry: geo)
+            node.name = "bone_\(a)_\(b)"
+            if let pa = joints[a], let pb = joints[b] {
+                Self.orient(node,
+                    from: Self.toSCN(pa, z: Self.zOffset(a)),
+                    to:   Self.toSCN(pb, z: Self.zOffset(b)))
+            }
+            scene.rootNode.addChildNode(node)
+        }
+
+        return scene
+    }
+
+    func updateUIView(_ scnView: SCNView, context: Context) {
+        guard let scene = scnView.scene else { return }
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 0.04
+
+        // Update head
+        if let node = scene.rootNode.childNode(withName: "joint_nose", recursively: false),
+           let pt = joints["nose"] {
+            node.position = Self.toSCN(pt, z: 0)
+        }
+
+        // Update joint spheres
+        for name in ["neck", "leftShoulder", "rightShoulder", "leftHip", "rightHip",
+                     "leftKnee", "rightKnee", "leftElbow", "rightElbow"] {
+            if let node = scene.rootNode.childNode(withName: "joint_\(name)", recursively: false),
+               let pt = joints[name] {
+                node.position = Self.toSCN(pt, z: Self.zOffset(name))
+            }
+        }
+
+        // Update bones
+        for (a, b) in Self.bones {
+            if let node = scene.rootNode.childNode(withName: "bone_\(a)_\(b)", recursively: false),
+               let pa = joints[a], let pb = joints[b] {
+                Self.orient(node,
+                    from: Self.toSCN(pa, z: Self.zOffset(a)),
+                    to:   Self.toSCN(pb, z: Self.zOffset(b)))
+            }
+        }
+
+        SCNTransaction.commit()
     }
 }

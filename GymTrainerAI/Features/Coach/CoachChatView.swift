@@ -22,9 +22,16 @@ struct CoachChatView: View {
     @State private var isLoading = false
     @State private var errorMessage: String? = nil
     @State private var showClearConfirm = false
+    @State private var showAPIKeySheet = false
+    @State private var isVoiceListening = false
     @FocusState private var inputFocused: Bool
 
     private let persistenceKey = "coachChatHistory"
+
+    private var hasAPIKey: Bool {
+        guard let key = KeychainService.load("AI_API_KEY") else { return false }
+        return !key.isEmpty
+    }
 
     private let suggestions = [
         "Why is my form score dropping?",
@@ -53,6 +60,21 @@ struct CoachChatView: View {
             DS.bg.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                if !hasAPIKey {
+                    Button { showAPIKeySheet = true } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "key.fill").font(.caption).foregroundStyle(.black)
+                            Text("No API key set — tap to configure")
+                                .font(.caption.weight(.semibold)).foregroundStyle(.black)
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.black.opacity(0.6))
+                        }
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .background(DS.lime)
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 12) {
@@ -125,6 +147,9 @@ struct CoachChatView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will delete the entire chat history.")
+        }
+        .sheet(isPresented: $showAPIKeySheet) {
+            APIKeySetupSheet()
         }
     }
 
@@ -223,7 +248,36 @@ struct CoachChatView: View {
 
     private var inputBar: some View {
         HStack(spacing: 10) {
-            TextField("Ask your trainer…", text: $inputText, axis: .vertical)
+            // Voice mic button
+            Button {
+                if isVoiceListening {
+                    sessionManager.voiceCoach.stopListening()
+                    isVoiceListening = false
+                } else {
+                    isVoiceListening = true
+                    inputText = ""
+                    sessionManager.voiceCoach.startListening { spokenText in
+                        isVoiceListening = false
+                        send(spokenText)
+                    }
+                }
+            } label: {
+                Image(systemName: isVoiceListening ? "waveform" : "mic.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(isVoiceListening ? .red : DS.textSecondary)
+                    .frame(width: 36, height: 36)
+                    .background(isVoiceListening ? Color.red.opacity(0.12) : DS.elevated)
+                    .clipShape(Circle())
+                    .scaleEffect(isVoiceListening ? 1.1 : 1.0)
+                    .animation(.easeInOut(duration: 0.4).repeatForever(autoreverses: true),
+                               value: isVoiceListening)
+            }
+            .buttonStyle(.plain)
+
+            TextField(isVoiceListening ? sessionManager.voiceCoach.partialTranscript.isEmpty
+                      ? "Listening…" : sessionManager.voiceCoach.partialTranscript
+                      : "Ask your trainer…",
+                      text: $inputText, axis: .vertical)
                 .textFieldStyle(.plain)
                 .foregroundStyle(DS.textPrimary)
                 .tint(DS.lime)
@@ -278,8 +332,11 @@ struct CoachChatView: View {
         let reply = await sessionManager.chatWithCoach(message: message, chatHistory: history, workoutContext: context)
         await MainActor.run {
             isLoading = false
-            if reply.isEmpty {
-                errorMessage = "Couldn't connect — try again."
+            let knownErrors = ["API key missing", "No response", "Error:", "Invalid response",
+                               "Failed creating", "Unknown API", "Couldn't connect"]
+            let isError = reply.isEmpty || knownErrors.contains { reply.hasPrefix($0) }
+            if isError {
+                errorMessage = reply.isEmpty ? "Couldn't connect — try again." : reply
             } else {
                 messages.append(ChatMessage(role: "assistant", content: reply))
                 saveHistory()
@@ -298,5 +355,96 @@ struct CoachChatView: View {
         guard let data = UserDefaults.standard.data(forKey: persistenceKey),
               let saved = try? JSONDecoder().decode([ChatMessage].self, from: data) else { return }
         messages = saved.filter { !$0.content.isEmpty }
+    }
+}
+
+// MARK: - API Key setup sheet
+
+private struct APIKeySetupSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var provider: String = UserDefaults.standard.string(forKey: "AI_PROVIDER") ?? "groq"
+    @State private var apiKey: String = KeychainService.load("AI_API_KEY") ?? ""
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                DS.bg.ignoresSafeArea()
+                VStack(spacing: 20) {
+                    Text("Configure AI Provider")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(DS.textPrimary)
+                        .padding(.top, 24)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Provider").font(.caption).foregroundStyle(DS.textSecondary)
+                        Picker("", selection: $provider) {
+                            Text("Groq (free, fast)").tag("groq")
+                            Text("Anthropic (Claude)").tag("anthropic")
+                            Text("AIMLAPI").tag("aimlapi")
+                        }
+                        .pickerStyle(.menu)
+                        .tint(DS.lime)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(DS.elevated)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                    .padding(.horizontal, 20)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("API Key").font(.caption).foregroundStyle(DS.textSecondary)
+                        SecureField("Paste your API key", text: $apiKey)
+                            .textFieldStyle(.plain)
+                            .foregroundStyle(DS.textPrimary)
+                            .tint(DS.lime)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                            .padding(12)
+                            .background(DS.elevated)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                    .padding(.horizontal, 20)
+
+                    Text(providerHint)
+                        .font(.caption2)
+                        .foregroundStyle(DS.textTertiary)
+                        .padding(.horizontal, 20)
+
+                    Button {
+                        KeychainService.save("AI_API_KEY", value: apiKey)
+                        UserDefaults.standard.set(provider, forKey: "AI_PROVIDER")
+                        dismiss()
+                    } label: {
+                        Text("Save & Connect")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(apiKey.isEmpty ? DS.elevated : DS.lime)
+                            .foregroundStyle(apiKey.isEmpty ? DS.textTertiary : .black)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(apiKey.isEmpty)
+                    .padding(.horizontal, 20)
+
+                    Spacer()
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }.foregroundStyle(DS.textSecondary)
+                }
+            }
+        }
+    }
+
+    private var providerHint: String {
+        switch provider {
+        case "groq":       return "Get a free key at console.groq.com — model: llama-3.3-70b-versatile"
+        case "anthropic":  return "Get a key at console.anthropic.com — model: claude-sonnet-4-6"
+        case "aimlapi":    return "Get a key at aimlapi.com"
+        default:           return ""
+        }
     }
 }

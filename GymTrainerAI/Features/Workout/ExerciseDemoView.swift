@@ -5,60 +5,81 @@ import SwiftUI
 private struct MuscleZone: Identifiable {
     let id: String
     let keywords: [String]
-    let rects: [CGRect]
+    let frontRects: [CGRect]   // normalized 0-1; empty = not visible on this face
+    let backRects: [CGRect]
 }
 
 private let muscleZones: [MuscleZone] = [
+    // FRONT-DOMINANT
     MuscleZone(id: "chest",
                keywords: ["pector", "chest"],
-               rects: [CGRect(x: 0.34, y: 0.21, width: 0.32, height: 0.10)]),
+               frontRects: [CGRect(x: 0.32, y: 0.21, width: 0.36, height: 0.11)],
+               backRects: []),
     MuscleZone(id: "shoulders",
                keywords: ["delt", "shoulder"],
-               rects: [CGRect(x: 0.14, y: 0.20, width: 0.13, height: 0.09),
-                       CGRect(x: 0.73, y: 0.20, width: 0.13, height: 0.09)]),
+               frontRects: [CGRect(x: 0.13, y: 0.19, width: 0.14, height: 0.09),
+                            CGRect(x: 0.73, y: 0.19, width: 0.14, height: 0.09)],
+               backRects: [CGRect(x: 0.13, y: 0.19, width: 0.14, height: 0.09),
+                           CGRect(x: 0.73, y: 0.19, width: 0.14, height: 0.09)]),
     MuscleZone(id: "biceps",
                keywords: ["bicep", "brachialis"],
-               rects: [CGRect(x: 0.14, y: 0.29, width: 0.12, height: 0.11),
-                       CGRect(x: 0.74, y: 0.29, width: 0.12, height: 0.11)]),
+               frontRects: [CGRect(x: 0.13, y: 0.29, width: 0.12, height: 0.12),
+                            CGRect(x: 0.75, y: 0.29, width: 0.12, height: 0.12)],
+               backRects: []),
     MuscleZone(id: "triceps",
                keywords: ["tricep"],
-               rects: [CGRect(x: 0.14, y: 0.30, width: 0.12, height: 0.10),
-                       CGRect(x: 0.74, y: 0.30, width: 0.12, height: 0.10)]),
+               frontRects: [],
+               backRects: [CGRect(x: 0.13, y: 0.29, width: 0.12, height: 0.12),
+                           CGRect(x: 0.75, y: 0.29, width: 0.12, height: 0.12)]),
     MuscleZone(id: "forearms",
                keywords: ["forearm", "brachioradial"],
-               rects: [CGRect(x: 0.10, y: 0.42, width: 0.10, height: 0.12),
-                       CGRect(x: 0.80, y: 0.42, width: 0.10, height: 0.12)]),
+               frontRects: [CGRect(x: 0.10, y: 0.42, width: 0.10, height: 0.12),
+                            CGRect(x: 0.80, y: 0.42, width: 0.10, height: 0.12)],
+               backRects: [CGRect(x: 0.10, y: 0.42, width: 0.10, height: 0.12),
+                           CGRect(x: 0.80, y: 0.42, width: 0.10, height: 0.12)]),
+    // BACK-DOMINANT
     MuscleZone(id: "lats",
                keywords: ["lat", "latissimus"],
-               rects: [CGRect(x: 0.28, y: 0.28, width: 0.10, height: 0.14),
-                       CGRect(x: 0.62, y: 0.28, width: 0.10, height: 0.14)]),
+               frontRects: [],
+               backRects: [CGRect(x: 0.29, y: 0.28, width: 0.11, height: 0.16),
+                           CGRect(x: 0.60, y: 0.28, width: 0.11, height: 0.16)]),
     MuscleZone(id: "traps",
                keywords: ["trap"],
-               rects: [CGRect(x: 0.35, y: 0.18, width: 0.30, height: 0.08)]),
-    MuscleZone(id: "core",
-               keywords: ["core", "abs", "rectus", "oblique", "serratus"],
-               rects: [CGRect(x: 0.37, y: 0.31, width: 0.26, height: 0.14)]),
+               frontRects: [],
+               backRects: [CGRect(x: 0.33, y: 0.17, width: 0.34, height: 0.10)]),
     MuscleZone(id: "lower_back",
                keywords: ["lower back", "erector", "lumbar"],
-               rects: [CGRect(x: 0.37, y: 0.39, width: 0.26, height: 0.08)]),
+               frontRects: [],
+               backRects: [CGRect(x: 0.37, y: 0.39, width: 0.26, height: 0.09)]),
     MuscleZone(id: "glutes",
                keywords: ["glut"],
-               rects: [CGRect(x: 0.33, y: 0.47, width: 0.34, height: 0.09)]),
-    MuscleZone(id: "hip",
-               keywords: ["hip flexor", "iliopsoas"],
-               rects: [CGRect(x: 0.38, y: 0.52, width: 0.24, height: 0.07)]),
-    MuscleZone(id: "quads",
-               keywords: ["quad"],
-               rects: [CGRect(x: 0.31, y: 0.58, width: 0.15, height: 0.16),
-                       CGRect(x: 0.54, y: 0.58, width: 0.15, height: 0.16)]),
+               frontRects: [],
+               backRects: [CGRect(x: 0.32, y: 0.48, width: 0.36, height: 0.10)]),
     MuscleZone(id: "hamstrings",
                keywords: ["hamstring"],
-               rects: [CGRect(x: 0.31, y: 0.60, width: 0.15, height: 0.14),
-                       CGRect(x: 0.54, y: 0.60, width: 0.15, height: 0.14)]),
+               frontRects: [],
+               backRects: [CGRect(x: 0.31, y: 0.59, width: 0.16, height: 0.17),
+                           CGRect(x: 0.53, y: 0.59, width: 0.16, height: 0.17)]),
+    // BOTH FACES
+    MuscleZone(id: "core",
+               keywords: ["core", "abs", "rectus", "oblique", "serratus"],
+               frontRects: [CGRect(x: 0.37, y: 0.32, width: 0.26, height: 0.14)],
+               backRects: []),
+    MuscleZone(id: "hip",
+               keywords: ["hip flexor", "iliopsoas"],
+               frontRects: [CGRect(x: 0.38, y: 0.50, width: 0.24, height: 0.07)],
+               backRects: []),
+    MuscleZone(id: "quads",
+               keywords: ["quad"],
+               frontRects: [CGRect(x: 0.31, y: 0.58, width: 0.16, height: 0.17),
+                            CGRect(x: 0.53, y: 0.58, width: 0.16, height: 0.17)],
+               backRects: []),
     MuscleZone(id: "calves",
                keywords: ["calf", "calves", "gastro", "soleus"],
-               rects: [CGRect(x: 0.33, y: 0.78, width: 0.12, height: 0.14),
-                       CGRect(x: 0.54, y: 0.78, width: 0.12, height: 0.14)]),
+               frontRects: [CGRect(x: 0.33, y: 0.78, width: 0.13, height: 0.14),
+                            CGRect(x: 0.53, y: 0.78, width: 0.13, height: 0.14)],
+               backRects: [CGRect(x: 0.33, y: 0.78, width: 0.13, height: 0.14),
+                           CGRect(x: 0.53, y: 0.78, width: 0.13, height: 0.14)]),
 ]
 
 // MARK: - Muscle highlight view
@@ -66,6 +87,7 @@ private let muscleZones: [MuscleZone] = [
 struct MuscleMapView: View {
     let musclesTargeted: [String]
     let phase: Double
+    let showBack: Bool
 
     private var pulse: Double { (sin(phase) + 1) / 2 }
 
@@ -86,58 +108,25 @@ struct MuscleMapView: View {
         let p = pulse
         ZStack {
             Canvas { ctx, size in
-                drawSilhouette(into: &ctx, size: size)
+                drawSilhouette(into: &ctx, size: size, back: showBack)
             }
             Canvas { ctx, size in
                 drawZones(into: &ctx, size: size, active: active, glowPass: true, pulse: p)
             }
             .blur(radius: 14)
-
             Canvas { ctx, size in
                 drawZones(into: &ctx, size: size, active: active, glowPass: false, pulse: p)
             }
-
-            // Targeted muscle labels
-            GeometryReader { geo in
-                let w = geo.size.width, h = geo.size.height
-                ForEach(muscleZones.filter { active.contains($0.id) }) { zone in
-                    if let first = zone.rects.first {
-                        Text(zoneName(zone.id))
-                            .font(.system(size: 8, weight: .semibold))
-                            .foregroundStyle(Color(red: 0.1, green: 0.1, blue: 0.0))
-                            .position(
-                                x: (first.midX) * w,
-                                y: (first.midY) * h
-                            )
-                    }
-                }
-            }
         }
     }
 
-    private func zoneName(_ id: String) -> String {
-        switch id {
-        case "chest":      return "Chest"
-        case "shoulders":  return "Delts"
-        case "biceps":     return "Biceps"
-        case "triceps":    return "Triceps"
-        case "forearms":   return "Forearms"
-        case "lats":       return "Lats"
-        case "traps":      return "Traps"
-        case "core":       return "Core"
-        case "lower_back": return "Lower Back"
-        case "glutes":     return "Glutes"
-        case "hip":        return "Hip Flex"
-        case "quads":      return "Quads"
-        case "hamstrings": return "Hamstrings"
-        case "calves":     return "Calves"
-        default:           return id
-        }
+    private func activeRects(for zone: MuscleZone) -> [CGRect] {
+        showBack ? zone.backRects : zone.frontRects
     }
 
-    private func drawSilhouette(into ctx: inout GraphicsContext, size: CGSize) {
+    private func drawSilhouette(into ctx: inout GraphicsContext, size: CGSize, back: Bool) {
         let w = size.width, h = size.height
-        let c = GraphicsContext.Shading.color(.white.opacity(0.13))
+        let c = GraphicsContext.Shading.color(.white.opacity(0.14))
 
         func ell(_ x: CGFloat, _ y: CGFloat, _ wd: CGFloat, _ ht: CGFloat) {
             ctx.fill(Path(ellipseIn: CGRect(x: x*w, y: y*h, width: wd*w, height: ht*h)), with: c)
@@ -146,18 +135,25 @@ struct MuscleMapView: View {
             ctx.fill(Path(roundedRect: CGRect(x: x*w, y: y*h, width: wd*w, height: ht*h), cornerRadius: r), with: c)
         }
 
-        ell(0.39, 0.01, 0.22, 0.13)            // head
-        rr(0.45, 0.13, 0.10, 0.05)             // neck
-        rr(0.28, 0.18, 0.44, 0.30, r: 10)     // torso
-        rr(0.30, 0.47, 0.40, 0.10, r: 8)      // pelvis
-        rr(0.14, 0.20, 0.13, 0.20, r: 7)      // L upper arm
-        rr(0.73, 0.20, 0.13, 0.20, r: 7)      // R upper arm
-        rr(0.10, 0.40, 0.11, 0.18, r: 6)      // L forearm
-        rr(0.79, 0.40, 0.11, 0.18, r: 6)      // R forearm
-        rr(0.31, 0.56, 0.17, 0.22, r: 8)      // L thigh
-        rr(0.52, 0.56, 0.17, 0.22, r: 8)      // R thigh
-        rr(0.33, 0.78, 0.13, 0.17, r: 6)      // L calf
-        rr(0.54, 0.78, 0.13, 0.17, r: 6)      // R calf
+        ell(0.39, 0.01, 0.22, 0.13)             // head
+        rr(0.45, 0.13, 0.10, 0.05)              // neck
+        rr(0.28, 0.18, 0.44, 0.30, r: 10)      // torso
+        rr(0.30, 0.47, 0.40, 0.10, r: 8)       // pelvis
+        rr(0.13, 0.19, 0.14, 0.21, r: 7)       // L upper arm
+        rr(0.73, 0.19, 0.14, 0.21, r: 7)       // R upper arm
+        rr(0.10, 0.40, 0.12, 0.18, r: 6)       // L forearm
+        rr(0.78, 0.40, 0.12, 0.18, r: 6)       // R forearm
+        rr(0.32, 0.56, 0.17, 0.22, r: 8)       // L thigh
+        rr(0.51, 0.56, 0.17, 0.22, r: 8)       // R thigh
+        rr(0.33, 0.78, 0.14, 0.17, r: 6)       // L calf
+        rr(0.53, 0.78, 0.14, 0.17, r: 6)       // R calf
+
+        if back {
+            // Spine line hint on back view
+            let spineColor = GraphicsContext.Shading.color(.white.opacity(0.06))
+            ctx.fill(Path(roundedRect: CGRect(x: 0.485*w, y: 0.19*h,
+                                             width: 0.03*w, height: 0.28*h), cornerRadius: 4), with: spineColor)
+        }
     }
 
     private func drawZones(into ctx: inout GraphicsContext, size: CGSize,
@@ -166,8 +162,10 @@ struct MuscleMapView: View {
         let lime = Color(red: 0.78, green: 1.0, blue: 0.18)
 
         for zone in muscleZones {
+            let rects = showBack ? zone.backRects : zone.frontRects
+            guard !rects.isEmpty else { continue }
             let isActive = active.contains(zone.id)
-            for rect in zone.rects {
+            for rect in rects {
                 let scaled = CGRect(x: rect.minX * w, y: rect.minY * h,
                                     width: rect.width * w, height: rect.height * h)
                 let path = Path(ellipseIn: scaled)
@@ -189,6 +187,7 @@ struct ExerciseDemoView: View {
     let onStart: () -> Void
 
     @State private var phase: Double = 0
+    @State private var showBack = false
     private let timer = Timer.publish(every: 0.033, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -207,22 +206,36 @@ struct ExerciseDemoView: View {
                             .font(.caption)
                             .foregroundStyle(DS.textSecondary)
                     }
-                    .padding(.top, 32).padding(.horizontal, 20).padding(.bottom, 20)
+                    .padding(.top, 32).padding(.horizontal, 20).padding(.bottom, 16)
+
+                    // Front / Back toggle
+                    HStack(spacing: 0) {
+                        ForEach(["Front", "Back"], id: \.self) { label in
+                            let isSelected = (label == "Back") == showBack
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) { showBack = label == "Back" }
+                            } label: {
+                                Text(label)
+                                    .font(.callout.weight(isSelected ? .semibold : .medium))
+                                    .foregroundStyle(isSelected ? .black : DS.textSecondary)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                                    .background(isSelected ? DS.lime : Color.clear)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(4)
+                    .background(DS.elevated)
+                    .clipShape(Capsule())
+                    .padding(.horizontal, 60).padding(.bottom, 14)
 
                     // Muscle map
                     ZStack {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(DS.surface)
-                        VStack(spacing: 6) {
-                            MuscleMapView(musclesTargeted: exercise.musclesTargeted, phase: phase)
-                                .frame(height: 200)
-                                .padding(.horizontal, 12)
-                            Text("Targeted muscles")
-                                .font(.caption2)
-                                .foregroundStyle(DS.textSecondary.opacity(0.6))
-                                .padding(.bottom, 10)
-                        }
-                        .padding(.top, 12)
+                        RoundedRectangle(cornerRadius: 20, style: .continuous).fill(DS.surface)
+                        MuscleMapView(musclesTargeted: exercise.musclesTargeted, phase: phase, showBack: showBack)
+                            .padding(14)
                     }
                     .frame(height: 260)
                     .padding(.horizontal, 20).padding(.bottom, 24)

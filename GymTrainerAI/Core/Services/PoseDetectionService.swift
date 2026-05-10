@@ -42,6 +42,7 @@ class PoseDetectionService: NSObject, ObservableObject {
     @Published var currentPose: PoseData?
     @Published var isRunning = false
     @Published var cameraPermissionGranted = false
+    @Published var cameraPosition: AVCaptureDevice.Position = .front
 
     var onSessionReady: (() -> Void)?
 
@@ -77,10 +78,12 @@ class PoseDetectionService: NSObject, ObservableObject {
     // MARK: - Session setup
 
     private func setupSession() {
+        // Remove existing inputs before reconfiguring
         captureSession.beginConfiguration()
+        captureSession.inputs.forEach { captureSession.removeInput($0) }
         captureSession.sessionPreset = .vga640x480  // Lower res = faster Vision processing
 
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition),
               let input = try? AVCaptureDeviceInput(device: camera),
               captureSession.canAddInput(input) else {
             captureSession.commitConfiguration()
@@ -129,6 +132,18 @@ class PoseDetectionService: NSObject, ObservableObject {
         }
     }
 
+    func switchCamera() {
+        let wasRunning = captureSession.isRunning
+        poseQueue.async {
+            if wasRunning { self.captureSession.stopRunning() }
+            DispatchQueue.main.async {
+                self.cameraPosition = self.cameraPosition == .front ? .back : .front
+                self.setupSession()
+                if wasRunning { self.start() }
+            }
+        }
+    }
+
     // MARK: - Vision processing
 
     private func runPoseDetection(on buffer: CVPixelBuffer) {
@@ -155,7 +170,8 @@ class PoseDetectionService: NSObject, ObservableObject {
         for (visionName, key) in visionJointMap {
             guard let point = try? observation.recognizedPoint(visionName),
                   point.confidence > 0.3 else { continue }
-            joints[key] = CGPoint(x: 1.0 - point.location.x, y: 1.0 - point.location.y)
+            let x = cameraPosition == .front ? 1.0 - point.location.x : point.location.x
+            joints[key] = CGPoint(x: x, y: 1.0 - point.location.y)
             confidence[key] = point.confidence
         }
 

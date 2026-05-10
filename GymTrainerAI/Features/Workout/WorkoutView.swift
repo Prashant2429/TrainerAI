@@ -82,11 +82,29 @@ struct WorkoutView: View {
                 VStack { activeHUD.padding(.top, 8); Spacer() }
             }
 
-            if sessionManager.session.isSetActive {
-                VStack {
-                    HStack { Spacer(); aiProcessingBadge.padding(.top, 12).padding(.trailing, 16) }
+            // Camera flip + AI badge row
+            VStack {
+                HStack {
+                    Button {
+                        sessionManager.poseService.switchCamera()
+                    } label: {
+                        Image(systemName: "camera.rotate.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.white)
+                            .padding(10)
+                            .background(.black.opacity(0.45)).background(.ultraThinMaterial)
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 12).padding(.leading, 16)
+
                     Spacer()
+
+                    if sessionManager.session.isSetActive {
+                        aiProcessingBadge.padding(.top, 12).padding(.trailing, 16)
+                    }
                 }
+                Spacer()
             }
 
             if let flash = errorFlash {
@@ -152,6 +170,14 @@ struct WorkoutView: View {
                 hudVertDivider
                 hudBlock(top: GripArcView(angle: avgPIP), label: "GRIP")
             }
+            hudVertDivider
+            hudBlock(
+                top: Text("\(Int(sessionManager.liveFormScore * 100))%")
+                    .font(.system(size: 28, weight: .heavy, design: .rounded))
+                    .foregroundStyle(formScoreColor(sessionManager.liveFormScore))
+                    .contentTransition(.numericText()),
+                label: "FORM"
+            )
         }
         .padding(.horizontal, 28).padding(.vertical, 14)
         .background(.ultraThinMaterial).background(Color.black.opacity(0.45))
@@ -423,6 +449,10 @@ struct WorkoutView: View {
     }
 
     // MARK: - Helpers
+
+    private func formScoreColor(_ score: Double) -> Color {
+        score >= 0.80 ? DS.lime : score >= 0.60 ? .orange : .red
+    }
 
     private func categoryColor(_ cat: Exercise.Category) -> Color {
         switch cat {

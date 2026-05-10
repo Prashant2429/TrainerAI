@@ -9,6 +9,7 @@ class SessionManager: ObservableObject {
     @Published var repCount: Int = 0
     @Published var currentErrorJoints: Set<String> = []
     @Published var lastDebriefText: String = ""
+    @Published var liveFormScore: Double = 1.0
 
     var modelContext: ModelContext?
     private var pendingSetEntries: [SetLogEntry] = []
@@ -71,6 +72,13 @@ class SessionManager: ObservableObject {
                 self?.session.logRep()
                 self?.repCount = self?.session.repCount ?? 0
 
+                // Live form score: penalise each unique error by 15%, floor 30%
+                if let errorCount = self?.session.formErrors.count,
+                   let repCount = self?.session.repCount, repCount > 0 {
+                    let penalty = Double(min(errorCount, 5)) * 0.14
+                    self?.liveFormScore = max(0.30, 1.0 - penalty)
+                }
+
                 if let curl = self?.fingerCurl.curlData {
                     self?.gripSamplesDuringSet.append(
                         (curl.indexPIP + curl.middlePIP) / 2.0
@@ -123,6 +131,7 @@ class SessionManager: ObservableObject {
         session.startSet(exercise: exercise)
 
         repCount = 0
+        liveFormScore = 1.0
         gripSamplesDuringSet = []
         lastGripTip = ""
         lastFormError = nil

@@ -41,7 +41,7 @@ class VoiceCoachService: NSObject, ObservableObject {
         do {
             try AVAudioSession.sharedInstance().setCategory(
                 .playAndRecord, mode: .measurement,
-                options: [.defaultToSpeaker, .mixWithOthers])
+                options: [.defaultToSpeaker, .mixWithOthers, .allowBluetooth, .allowBluetoothA2DP])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch { return }
 

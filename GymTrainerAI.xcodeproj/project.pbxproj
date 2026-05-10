@@ -75,7 +75,7 @@
 		9D9E3443785ED916306E5460 /* WorkoutSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSessionTests.swift; sourceTree = "<group>"; };
 		A99ABE8D813541583803C0C2 /* FingerTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FingerTestView.swift; sourceTree = "<group>"; };
 		B342BB99570AD0ADFF3B3D2B /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
-		B7BADAB173EDC4278D46F96B /* GymTrainerAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GymTrainerAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7BADAB173EDC4278D46F96B /* GymTrainerAI.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GymTrainerAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDF30FCDA95468BC07794DF4 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		D29D274C5C932434B1E733A7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D9ABFC7B87EA2E04A8CB5EA0 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
@@ -297,6 +297,9 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					59346A353D0ABD591DAE151B = {
+						DevelopmentTeam = NPYR32GRM3;
+					};
+					5CAA4C29469B5B6BCFE3EE2A = {
 						DevelopmentTeam = NPYR32GRM3;
 					};
 				};
@@ -536,7 +539,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = S2SVNMJTRY;
+				DEVELOPMENT_TEAM = NPYR32GRM3;
 				INFOPLIST_FILE = GymTrainerAI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -553,7 +556,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = S2SVNMJTRY;
+				DEVELOPMENT_TEAM = NPYR32GRM3;
 				INFOPLIST_FILE = GymTrainerAI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

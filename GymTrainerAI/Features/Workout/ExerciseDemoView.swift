@@ -1,236 +1,184 @@
 import SwiftUI
-import SceneKit
 
-// MARK: - Demo keyframe data
+// MARK: - Muscle zone definitions
 
-private enum ExercisePoses {
+private struct MuscleZone: Identifiable {
+    let id: String
+    let keywords: [String]
+    let rects: [CGRect]
+}
 
-    static let standing: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.30, y: 0.36),
-        "rightElbow":    CGPoint(x: 0.70, y: 0.36),
-        "leftWrist":     CGPoint(x: 0.27, y: 0.50),
-        "rightWrist":    CGPoint(x: 0.73, y: 0.50),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
+private let muscleZones: [MuscleZone] = [
+    MuscleZone(id: "chest",
+               keywords: ["pector", "chest"],
+               rects: [CGRect(x: 0.34, y: 0.21, width: 0.32, height: 0.10)]),
+    MuscleZone(id: "shoulders",
+               keywords: ["delt", "shoulder"],
+               rects: [CGRect(x: 0.14, y: 0.20, width: 0.13, height: 0.09),
+                       CGRect(x: 0.73, y: 0.20, width: 0.13, height: 0.09)]),
+    MuscleZone(id: "biceps",
+               keywords: ["bicep", "brachialis"],
+               rects: [CGRect(x: 0.14, y: 0.29, width: 0.12, height: 0.11),
+                       CGRect(x: 0.74, y: 0.29, width: 0.12, height: 0.11)]),
+    MuscleZone(id: "triceps",
+               keywords: ["tricep"],
+               rects: [CGRect(x: 0.14, y: 0.30, width: 0.12, height: 0.10),
+                       CGRect(x: 0.74, y: 0.30, width: 0.12, height: 0.10)]),
+    MuscleZone(id: "forearms",
+               keywords: ["forearm", "brachioradial"],
+               rects: [CGRect(x: 0.10, y: 0.42, width: 0.10, height: 0.12),
+                       CGRect(x: 0.80, y: 0.42, width: 0.10, height: 0.12)]),
+    MuscleZone(id: "lats",
+               keywords: ["lat", "latissimus"],
+               rects: [CGRect(x: 0.28, y: 0.28, width: 0.10, height: 0.14),
+                       CGRect(x: 0.62, y: 0.28, width: 0.10, height: 0.14)]),
+    MuscleZone(id: "traps",
+               keywords: ["trap"],
+               rects: [CGRect(x: 0.35, y: 0.18, width: 0.30, height: 0.08)]),
+    MuscleZone(id: "core",
+               keywords: ["core", "abs", "rectus", "oblique", "serratus"],
+               rects: [CGRect(x: 0.37, y: 0.31, width: 0.26, height: 0.14)]),
+    MuscleZone(id: "lower_back",
+               keywords: ["lower back", "erector", "lumbar"],
+               rects: [CGRect(x: 0.37, y: 0.39, width: 0.26, height: 0.08)]),
+    MuscleZone(id: "glutes",
+               keywords: ["glut"],
+               rects: [CGRect(x: 0.33, y: 0.47, width: 0.34, height: 0.09)]),
+    MuscleZone(id: "hip",
+               keywords: ["hip flexor", "iliopsoas"],
+               rects: [CGRect(x: 0.38, y: 0.52, width: 0.24, height: 0.07)]),
+    MuscleZone(id: "quads",
+               keywords: ["quad"],
+               rects: [CGRect(x: 0.31, y: 0.58, width: 0.15, height: 0.16),
+                       CGRect(x: 0.54, y: 0.58, width: 0.15, height: 0.16)]),
+    MuscleZone(id: "hamstrings",
+               keywords: ["hamstring"],
+               rects: [CGRect(x: 0.31, y: 0.60, width: 0.15, height: 0.14),
+                       CGRect(x: 0.54, y: 0.60, width: 0.15, height: 0.14)]),
+    MuscleZone(id: "calves",
+               keywords: ["calf", "calves", "gastro", "soleus"],
+               rects: [CGRect(x: 0.33, y: 0.78, width: 0.12, height: 0.14),
+                       CGRect(x: 0.54, y: 0.78, width: 0.12, height: 0.14)]),
+]
 
-    static func movementPose(for exerciseId: String) -> [String: CGPoint] {
-        switch exerciseId {
-        case "squat", "goblet_squat", "leg_press", "leg_extension", "leg_curl":
-            return squatBottom
-        case "deadlift", "romanian_deadlift", "hip_thrust":
-            return deadliftHinge
-        case "bicep_curl":
-            return bicepCurlTop
-        case "ohp", "arnold_press":
-            return ohpTop
-        case "barbell_row", "cable_row":
-            return rowPulled
-        case "lateral_raise":
-            return lateralRaiseTop
-        case "bench_press", "incline_press", "skull_crusher":
-            return pressBottom
-        case "lunge":
-            return lungeBottom
-        case "cable_pushdown":
-            return pushdownBottom
-        default:
-            return genericCurlTop
+// MARK: - Muscle highlight view
+
+struct MuscleMapView: View {
+    let musclesTargeted: [String]
+    let phase: Double
+
+    private var pulse: Double { (sin(phase) + 1) / 2 }
+
+    private var activeZoneIds: Set<String> {
+        let lowercased = musclesTargeted.map { $0.lowercased() }
+        var active = Set<String>()
+        for zone in muscleZones {
+            for kw in zone.keywords where lowercased.contains(where: { $0.contains(kw) }) {
+                active.insert(zone.id)
+                break
+            }
+        }
+        return active
+    }
+
+    var body: some View {
+        let active = activeZoneIds
+        let p = pulse
+        ZStack {
+            Canvas { ctx, size in
+                drawSilhouette(into: &ctx, size: size)
+            }
+            Canvas { ctx, size in
+                drawZones(into: &ctx, size: size, active: active, glowPass: true, pulse: p)
+            }
+            .blur(radius: 14)
+
+            Canvas { ctx, size in
+                drawZones(into: &ctx, size: size, active: active, glowPass: false, pulse: p)
+            }
+
+            // Targeted muscle labels
+            GeometryReader { geo in
+                let w = geo.size.width, h = geo.size.height
+                ForEach(muscleZones.filter { active.contains($0.id) }) { zone in
+                    if let first = zone.rects.first {
+                        Text(zoneName(zone.id))
+                            .font(.system(size: 8, weight: .semibold))
+                            .foregroundStyle(Color(red: 0.1, green: 0.1, blue: 0.0))
+                            .position(
+                                x: (first.midX) * w,
+                                y: (first.midY) * h
+                            )
+                    }
+                }
+            }
         }
     }
 
-    static let squatBottom: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.27),
-        "neck":          CGPoint(x: 0.50, y: 0.37),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.44),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.44),
-        "leftElbow":     CGPoint(x: 0.29, y: 0.58),
-        "rightElbow":    CGPoint(x: 0.71, y: 0.58),
-        "leftWrist":     CGPoint(x: 0.28, y: 0.68),
-        "rightWrist":    CGPoint(x: 0.72, y: 0.68),
-        "leftHip":       CGPoint(x: 0.37, y: 0.65),
-        "rightHip":      CGPoint(x: 0.63, y: 0.65),
-        "leftKnee":      CGPoint(x: 0.30, y: 0.76),
-        "rightKnee":     CGPoint(x: 0.70, y: 0.76),
-        "leftAnkle":     CGPoint(x: 0.37, y: 0.91),
-        "rightAnkle":    CGPoint(x: 0.63, y: 0.91),
-    ]
-
-    static let deadliftHinge: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.18),
-        "neck":          CGPoint(x: 0.50, y: 0.26),
-        "leftShoulder":  CGPoint(x: 0.37, y: 0.33),
-        "rightShoulder": CGPoint(x: 0.63, y: 0.33),
-        "leftElbow":     CGPoint(x: 0.36, y: 0.49),
-        "rightElbow":    CGPoint(x: 0.64, y: 0.49),
-        "leftWrist":     CGPoint(x: 0.39, y: 0.62),
-        "rightWrist":    CGPoint(x: 0.61, y: 0.62),
-        "leftHip":       CGPoint(x: 0.41, y: 0.51),
-        "rightHip":      CGPoint(x: 0.59, y: 0.51),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.67),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.67),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let bicepCurlTop: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.36, y: 0.29),
-        "rightElbow":    CGPoint(x: 0.64, y: 0.29),
-        "leftWrist":     CGPoint(x: 0.30, y: 0.14),
-        "rightWrist":    CGPoint(x: 0.70, y: 0.14),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let ohpTop: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.27, y: 0.10),
-        "rightElbow":    CGPoint(x: 0.73, y: 0.10),
-        "leftWrist":     CGPoint(x: 0.25, y: 0.00),
-        "rightWrist":    CGPoint(x: 0.75, y: 0.00),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let rowPulled: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.15),
-        "neck":          CGPoint(x: 0.50, y: 0.23),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.30),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.30),
-        "leftElbow":     CGPoint(x: 0.31, y: 0.42),
-        "rightElbow":    CGPoint(x: 0.69, y: 0.42),
-        "leftWrist":     CGPoint(x: 0.39, y: 0.50),
-        "rightWrist":    CGPoint(x: 0.61, y: 0.50),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.67),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.67),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let lateralRaiseTop: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.16, y: 0.27),
-        "rightElbow":    CGPoint(x: 0.84, y: 0.27),
-        "leftWrist":     CGPoint(x: 0.06, y: 0.31),
-        "rightWrist":    CGPoint(x: 0.94, y: 0.31),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let pressBottom: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.21, y: 0.31),
-        "rightElbow":    CGPoint(x: 0.79, y: 0.31),
-        "leftWrist":     CGPoint(x: 0.36, y: 0.22),
-        "rightWrist":    CGPoint(x: 0.64, y: 0.22),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let lungeBottom: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.13),
-        "neck":          CGPoint(x: 0.50, y: 0.22),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.29),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.29),
-        "leftElbow":     CGPoint(x: 0.30, y: 0.43),
-        "rightElbow":    CGPoint(x: 0.70, y: 0.43),
-        "leftWrist":     CGPoint(x: 0.28, y: 0.57),
-        "rightWrist":    CGPoint(x: 0.72, y: 0.57),
-        "leftHip":       CGPoint(x: 0.42, y: 0.56),
-        "rightHip":      CGPoint(x: 0.58, y: 0.56),
-        "leftKnee":      CGPoint(x: 0.35, y: 0.73),
-        "rightKnee":     CGPoint(x: 0.60, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.32, y: 0.91),
-        "rightAnkle":    CGPoint(x: 0.62, y: 0.91),
-    ]
-
-    static let pushdownBottom: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.39, y: 0.28),
-        "rightElbow":    CGPoint(x: 0.61, y: 0.28),
-        "leftWrist":     CGPoint(x: 0.37, y: 0.48),
-        "rightWrist":    CGPoint(x: 0.63, y: 0.48),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static let genericCurlTop: [String: CGPoint] = [
-        "nose":          CGPoint(x: 0.50, y: 0.05),
-        "neck":          CGPoint(x: 0.50, y: 0.14),
-        "leftShoulder":  CGPoint(x: 0.36, y: 0.21),
-        "rightShoulder": CGPoint(x: 0.64, y: 0.21),
-        "leftElbow":     CGPoint(x: 0.36, y: 0.29),
-        "rightElbow":    CGPoint(x: 0.64, y: 0.29),
-        "leftWrist":     CGPoint(x: 0.32, y: 0.16),
-        "rightWrist":    CGPoint(x: 0.68, y: 0.16),
-        "leftHip":       CGPoint(x: 0.41, y: 0.50),
-        "rightHip":      CGPoint(x: 0.59, y: 0.50),
-        "leftKnee":      CGPoint(x: 0.41, y: 0.70),
-        "rightKnee":     CGPoint(x: 0.59, y: 0.70),
-        "leftAnkle":     CGPoint(x: 0.41, y: 0.90),
-        "rightAnkle":    CGPoint(x: 0.59, y: 0.90),
-    ]
-
-    static func lerp(_ a: CGPoint, _ b: CGPoint, t: Double) -> CGPoint {
-        CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t)
+    private func zoneName(_ id: String) -> String {
+        switch id {
+        case "chest":      return "Chest"
+        case "shoulders":  return "Delts"
+        case "biceps":     return "Biceps"
+        case "triceps":    return "Triceps"
+        case "forearms":   return "Forearms"
+        case "lats":       return "Lats"
+        case "traps":      return "Traps"
+        case "core":       return "Core"
+        case "lower_back": return "Lower Back"
+        case "glutes":     return "Glutes"
+        case "hip":        return "Hip Flex"
+        case "quads":      return "Quads"
+        case "hamstrings": return "Hamstrings"
+        case "calves":     return "Calves"
+        default:           return id
+        }
     }
 
-    static func interpolated(
-        from: [String: CGPoint],
-        to: [String: CGPoint],
-        t: Double
-    ) -> [String: CGPoint] {
-        var result: [String: CGPoint] = [:]
-        for (key, aPoint) in from {
-            result[key] = lerp(aPoint, to[key] ?? aPoint, t: t)
+    private func drawSilhouette(into ctx: inout GraphicsContext, size: CGSize) {
+        let w = size.width, h = size.height
+        let c = GraphicsContext.Shading.color(.white.opacity(0.13))
+
+        func ell(_ x: CGFloat, _ y: CGFloat, _ wd: CGFloat, _ ht: CGFloat) {
+            ctx.fill(Path(ellipseIn: CGRect(x: x*w, y: y*h, width: wd*w, height: ht*h)), with: c)
         }
-        return result
+        func rr(_ x: CGFloat, _ y: CGFloat, _ wd: CGFloat, _ ht: CGFloat, r: CGFloat = 6) {
+            ctx.fill(Path(roundedRect: CGRect(x: x*w, y: y*h, width: wd*w, height: ht*h), cornerRadius: r), with: c)
+        }
+
+        ell(0.39, 0.01, 0.22, 0.13)            // head
+        rr(0.45, 0.13, 0.10, 0.05)             // neck
+        rr(0.28, 0.18, 0.44, 0.30, r: 10)     // torso
+        rr(0.30, 0.47, 0.40, 0.10, r: 8)      // pelvis
+        rr(0.14, 0.20, 0.13, 0.20, r: 7)      // L upper arm
+        rr(0.73, 0.20, 0.13, 0.20, r: 7)      // R upper arm
+        rr(0.10, 0.40, 0.11, 0.18, r: 6)      // L forearm
+        rr(0.79, 0.40, 0.11, 0.18, r: 6)      // R forearm
+        rr(0.31, 0.56, 0.17, 0.22, r: 8)      // L thigh
+        rr(0.52, 0.56, 0.17, 0.22, r: 8)      // R thigh
+        rr(0.33, 0.78, 0.13, 0.17, r: 6)      // L calf
+        rr(0.54, 0.78, 0.13, 0.17, r: 6)      // R calf
+    }
+
+    private func drawZones(into ctx: inout GraphicsContext, size: CGSize,
+                           active: Set<String>, glowPass: Bool, pulse: Double) {
+        let w = size.width, h = size.height
+        let lime = Color(red: 0.78, green: 1.0, blue: 0.18)
+
+        for zone in muscleZones {
+            let isActive = active.contains(zone.id)
+            for rect in zone.rects {
+                let scaled = CGRect(x: rect.minX * w, y: rect.minY * h,
+                                    width: rect.width * w, height: rect.height * h)
+                let path = Path(ellipseIn: scaled)
+                if isActive {
+                    let alpha = glowPass ? (0.35 + 0.45 * pulse) : (0.65 + 0.25 * pulse)
+                    ctx.fill(path, with: .color(lime.opacity(alpha)))
+                } else if !glowPass {
+                    ctx.fill(path, with: .color(.white.opacity(0.07)))
+                }
+            }
+        }
     }
 }
 
@@ -242,16 +190,6 @@ struct ExerciseDemoView: View {
 
     @State private var phase: Double = 0
     private let timer = Timer.publish(every: 0.033, on: .main, in: .common).autoconnect()
-
-    private var startPose: [String: CGPoint] { ExercisePoses.standing }
-    private var endPose: [String: CGPoint]   { ExercisePoses.movementPose(for: exercise.id) }
-
-    private var currentPose: PoseData {
-        // Smooth sinusoidal oscillation 0 → 1 → 0
-        let t = (sin(phase - .pi / 2) + 1) / 2
-        let joints = ExercisePoses.interpolated(from: startPose, to: endPose, t: t)
-        return PoseData(joints: joints, confidence: [:])
-    }
 
     var body: some View {
         ZStack {
@@ -271,12 +209,20 @@ struct ExerciseDemoView: View {
                     }
                     .padding(.top, 32).padding(.horizontal, 20).padding(.bottom, 20)
 
-                    // 3D avatar
+                    // Muscle map
                     ZStack {
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .fill(DS.surface)
-                        HumanAvatarSceneView(joints: currentPose.joints)
-                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        VStack(spacing: 6) {
+                            MuscleMapView(musclesTargeted: exercise.musclesTargeted, phase: phase)
+                                .frame(height: 200)
+                                .padding(.horizontal, 12)
+                            Text("Targeted muscles")
+                                .font(.caption2)
+                                .foregroundStyle(DS.textSecondary.opacity(0.6))
+                                .padding(.bottom, 10)
+                        }
+                        .padding(.top, 12)
                     }
                     .frame(height: 260)
                     .padding(.horizontal, 20).padding(.bottom, 24)
@@ -330,167 +276,7 @@ struct ExerciseDemoView: View {
             }
         }
         .onReceive(timer) { _ in
-            phase += 0.04  // ~5 second full cycle
+            phase += 0.04
         }
-    }
-}
-
-// MARK: - SceneKit 3D humanoid avatar
-
-struct HumanAvatarSceneView: UIViewRepresentable {
-
-    let joints: [String: CGPoint]
-
-    // Bone connections — each tuple is (startJoint, endJoint)
-    private static let bones: [(String, String)] = [
-        ("neck", "leftShoulder"),  ("neck", "rightShoulder"),
-        ("leftShoulder", "leftElbow"),   ("leftElbow", "leftWrist"),
-        ("rightShoulder", "rightElbow"), ("rightElbow", "rightWrist"),
-        ("leftShoulder", "leftHip"),     ("rightShoulder", "rightHip"),
-        ("leftHip", "rightHip"),
-        ("leftHip", "leftKnee"),   ("leftKnee", "leftAnkle"),
-        ("rightHip", "rightKnee"), ("rightKnee", "rightAnkle"),
-    ]
-
-    // Right-side joints sit slightly forward (+z), left-side slightly back (-z)
-    private static func zOffset(_ joint: String) -> Float {
-        joint.hasPrefix("right") ? 0.06 : joint.hasPrefix("left") ? -0.06 : 0
-    }
-
-    // Normalized 2D → SceneKit 3D
-    private static func toSCN(_ pt: CGPoint, z: Float = 0) -> SCNVector3 {
-        SCNVector3(Float(pt.x - 0.5) * 2.2, Float(-(pt.y - 0.5)) * 2.2, z)
-    }
-
-    // Point a capsule from a → b; updates its height and orientation
-    private static func orient(_ node: SCNNode, from a: SCNVector3, to b: SCNVector3) {
-        let dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z
-        let len = sqrt(dx*dx + dy*dy + dz*dz)
-        guard len > 0.001 else { return }
-        node.position = SCNVector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2)
-        (node.geometry as? SCNCapsule)?.height = CGFloat(len)
-        let ny = dy / len
-        let angle = acos(max(-1, min(1, ny)))
-        if angle < 0.001 { node.rotation = SCNVector4(0, 0, 1, 0); return }
-        if abs(angle - Float.pi) < 0.001 { node.rotation = SCNVector4(1, 0, 0, Float.pi); return }
-        // Cross product of (dx,dy,dz)/len with Y-axis (0,1,0) = (-dz, 0, dx)
-        let ax = -dz / len, az = dx / len
-        node.rotation = SCNVector4(ax, 0, az, angle)
-    }
-
-    private static func limeMaterial() -> SCNMaterial {
-        let mat = SCNMaterial()
-        mat.diffuse.contents  = UIColor(red: 0.78, green: 1.00, blue: 0.18, alpha: 1)
-        mat.specular.contents = UIColor.white
-        mat.shininess = 80
-        mat.lightingModel = .phong
-        return mat
-    }
-
-    func makeUIView(context: Context) -> SCNView {
-        let scnView = SCNView()
-        scnView.backgroundColor = .clear
-        scnView.antialiasingMode = .multisampling4X
-        scnView.allowsCameraControl = false
-        scnView.scene = buildScene()
-        return scnView
-    }
-
-    private func buildScene() -> SCNScene {
-        let scene = SCNScene()
-
-        // Camera
-        let cam = SCNNode()
-        cam.camera = SCNCamera()
-        cam.camera?.fieldOfView = 50
-        cam.position = SCNVector3(0, 0, 3.5)
-        scene.rootNode.addChildNode(cam)
-
-        // Ambient light
-        let ambient = SCNNode()
-        ambient.light = SCNLight()
-        ambient.light?.type = .ambient
-        ambient.light?.intensity = 400
-        scene.rootNode.addChildNode(ambient)
-
-        // Directional light from top-left
-        let omni = SCNNode()
-        omni.light = SCNLight()
-        omni.light?.type = .omni
-        omni.light?.intensity = 900
-        omni.position = SCNVector3(1.5, 2.5, 3)
-        scene.rootNode.addChildNode(omni)
-
-        // Head sphere
-        let headGeo = SCNSphere(radius: 0.13)
-        headGeo.firstMaterial = Self.limeMaterial()
-        let headNode = SCNNode(geometry: headGeo)
-        headNode.name = "joint_nose"
-        if let pt = joints["nose"] {
-            headNode.position = Self.toSCN(pt, z: 0)
-        }
-        scene.rootNode.addChildNode(headNode)
-
-        // Joint spheres at key nodes
-        for name in ["neck", "leftShoulder", "rightShoulder", "leftHip", "rightHip",
-                     "leftKnee", "rightKnee", "leftElbow", "rightElbow"] {
-            let geo = SCNSphere(radius: 0.055)
-            geo.firstMaterial = Self.limeMaterial()
-            let node = SCNNode(geometry: geo)
-            node.name = "joint_\(name)"
-            if let pt = joints[name] {
-                node.position = Self.toSCN(pt, z: Self.zOffset(name))
-            }
-            scene.rootNode.addChildNode(node)
-        }
-
-        // Bone capsules
-        for (a, b) in Self.bones {
-            let geo = SCNCapsule(capRadius: 0.048, height: 0.1)
-            geo.firstMaterial = Self.limeMaterial()
-            let node = SCNNode(geometry: geo)
-            node.name = "bone_\(a)_\(b)"
-            if let pa = joints[a], let pb = joints[b] {
-                Self.orient(node,
-                    from: Self.toSCN(pa, z: Self.zOffset(a)),
-                    to:   Self.toSCN(pb, z: Self.zOffset(b)))
-            }
-            scene.rootNode.addChildNode(node)
-        }
-
-        return scene
-    }
-
-    func updateUIView(_ scnView: SCNView, context: Context) {
-        guard let scene = scnView.scene else { return }
-        SCNTransaction.begin()
-        SCNTransaction.animationDuration = 0.04
-
-        // Update head
-        if let node = scene.rootNode.childNode(withName: "joint_nose", recursively: false),
-           let pt = joints["nose"] {
-            node.position = Self.toSCN(pt, z: 0)
-        }
-
-        // Update joint spheres
-        for name in ["neck", "leftShoulder", "rightShoulder", "leftHip", "rightHip",
-                     "leftKnee", "rightKnee", "leftElbow", "rightElbow"] {
-            if let node = scene.rootNode.childNode(withName: "joint_\(name)", recursively: false),
-               let pt = joints[name] {
-                node.position = Self.toSCN(pt, z: Self.zOffset(name))
-            }
-        }
-
-        // Update bones
-        for (a, b) in Self.bones {
-            if let node = scene.rootNode.childNode(withName: "bone_\(a)_\(b)", recursively: false),
-               let pa = joints[a], let pb = joints[b] {
-                Self.orient(node,
-                    from: Self.toSCN(pa, z: Self.zOffset(a)),
-                    to:   Self.toSCN(pb, z: Self.zOffset(b)))
-            }
-        }
-
-        SCNTransaction.commit()
     }
 }

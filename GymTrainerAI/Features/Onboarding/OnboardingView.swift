@@ -8,7 +8,7 @@ struct OnboardingView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var profile = UserProfile.empty
     @State private var isGeneratingPlan = false
-    @State private var selectedProvider: String = UserDefaults.standard.string(forKey: "AI_PROVIDER") ?? "nvidia"
+    @State private var selectedProvider: String = UserDefaults.standard.string(forKey: "AI_PROVIDER") ?? "groq"
     @State private var apiKeyInput: String = KeychainService.load("AI_API_KEY") ?? ""
 
     var body: some View {
@@ -144,7 +144,7 @@ struct OnboardingView: View {
                         formField(label: "AI Provider") {
                             Picker("", selection: $selectedProvider) {
                                 Text("Anthropic").tag("anthropic")
-                                Text("NVIDIA").tag("nvidia")
+                                Text("Groq").tag("groq")
                                 Text("AIMLAPI").tag("aimlapi")
                             }
                             .pickerStyle(.menu)
